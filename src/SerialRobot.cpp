@@ -1046,6 +1046,7 @@ executeMotion(false),repeatCount(1),reverseFlag(0),commandCount(0),senseTime(300
 {
   joints = n;
   hThread = NULL;
+  hThread2 = NULL; // @@@
   threadLoop = 0;
 
 #ifdef WIN32
@@ -1069,6 +1070,7 @@ executeMotion(false),repeatCount(1),reverseFlag(0),commandCount(0),senseTime(300
     setServoState(i, 1);
   }
 
+  jsf=H_NULL;
 }
 
 /**
@@ -1589,6 +1591,26 @@ SerialRobot::startThread()
   return 1;
 }
 
+int
+SerialRobot::startThread2()
+{
+  THREAD_FUNC thread_chk_controller(void *args);
+
+  jsf = open("/dev/input/js0", O_RDONLY);
+  if(jsf < 0){
+    std::cerr << "fail open startThread2" << std::endl;
+    jsf = H_NULL;
+    return -1;
+  }
+
+  if(Pthread_Create(&hThread2, NULL, thread_chk_controller, this) != 0){
+    std::cerr << "fail create Thread2" << std::endl;
+    threadLoop = 0;
+    return 0;
+  }
+  return 1;
+}
+
 /**
  stop command thread
  */
@@ -1602,12 +1624,15 @@ SerialRobot::stopThread()
   if(hThread == NULL) return 1;
 #else
   if(hThread == 0) return 1;
+  if(hThread2== 0) return 1; // @@@
 #endif
 
   Pthread_Join(hThread, NULL);
   Pthread_Mutex_Destroy(&mutex_com);
   Pthread_Mutex_Destroy(&mutex_motion);
   Pthread_Exit(hThread);
+  Pthread_Join(hThread2, NULL); // @@@
+  Pthread_Exit(hThread2); // @@@
 
 #ifdef WIN32
   mutex_com = NULL;
@@ -1615,6 +1640,8 @@ SerialRobot::stopThread()
 #endif
 
   hThread = NULL;
+  hThread2 = NULL; // @@@
+  close(jsf);
   return 0;
 }
 
@@ -1739,6 +1766,46 @@ SerialRobot::svc()
   }
 }
 
+void
+SerialRobot::svc2() // @@@
+{
+//  std::cerr << "svc2" << std::endl;
+  if(jsf != H_NULL)
+  {
+    js_event js;
+    read(jsf, &js, sizeof(js_event));
+
+    switch(js.type & ~JS_EVENT_INIT) {
+    case JS_EVENT_AXIS:
+      if (js.number < 4) {
+//       std::cerr << "AXIS[" << js.number << "]: " << js.value << std::endl;
+        printf("AXIS[%d]: %d  \n", js.number, js.value );
+      }
+      break;
+    case JS_EVENT_BUTTON:
+      switch(js.number) {
+      case 0:
+        if (js.value) { initPosition(); }
+        break;
+      case 4: // FORWORD
+        if (js.value) { selectMove(1); setMotionCount(1); }
+        break;
+      case 5: // RIGHT
+        if (js.value) { selectMove(4); setMotionCount(1); }
+        break;
+      case 6: // BACK
+        if (js.value) { selectMove(2); setMotionCount(1); }
+        break;
+      case 7: // LEFT
+        if (js.value) { selectMove(3); setMotionCount(1); }
+        break;
+      }
+//       std::cerr << "BUTTON[" << js.number << "]: " << js.value << std::endl;
+      printf("BUTTON[%d]: %d  \n", js.number, js.value );
+      break;
+    }
+  }
+}
 
 /******** Thread Function *****/
 
@@ -1788,6 +1855,21 @@ THREAD_FUNC thread_execution(void *args)
 #endif
 }
 
+THREAD_FUNC thread_chk_controller(void *args)
+{
+  SerialRobot *robot = (SerialRobot *)args;
+
+  while(robot->isActive()){
+    robot->svc2();
+  }
+  std::cerr << "Thread terminated2." << std::endl;
+
+#ifdef WIN32
+  return;
+#else
+  return NULL;
+#endif
+}
 
 #ifdef __cplusplus__
 };

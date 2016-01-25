@@ -45,6 +45,7 @@ C_DECLSPEC double deg2rad(double d);
  * This is a main thread function. 
  */
 THREAD_FUNC thread_execution(void *args);
+THREAD_FUNC thread_execution2(void *args);
 #ifdef __cplusplus__
 };
 #endif
@@ -370,6 +371,7 @@ public:
    *  start the thread which send motion commands.
    */
   int startThread();
+  int startThread2();
 
   /*
    *  stop the thread.
@@ -431,7 +433,9 @@ public:
   /*
    *  main thread function. this is similar to onExecution.... 
    */
-  virtual void svc();
+//  virtual void svc();
+  void svc();
+  void svc2();
 
   /*
    *  convert a porture to a command packet to the robot
@@ -482,11 +486,13 @@ private:
 
 public:
   THREAD_HANDLE hThread;       // thread handler
+  THREAD_HANDLE hThread2;      // thread handler2
   MUTEX_HANDLE mutex_com;      // mutex for commnication
   MUTEX_HANDLE mutex_motion;   // mutex for motion.
 
- 
   SerialCom *com;               // serial port to control a robot.
+
+  HANDLE jsf; // @@@
 };
 
 

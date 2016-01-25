@@ -57,6 +57,9 @@ using namespace std;
      delete G_ROBO;
      exit(1);
    }
+   if(G_ROBO->startThread2() == 0){ // @@@
+     std::cerr << "Error: fail to create thread2" << std::endl;
+   }
 
    /* 動作ファイルのディレクトリを指定する　*/
    G_ROBO->setMotionDir("motion");

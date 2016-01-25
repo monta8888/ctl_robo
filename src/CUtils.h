@@ -38,6 +38,7 @@ extern "C" {
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <ctype.h>
+#include <linux/joystick.h> // @@@
 
 #define C_DECLSPEC
 #endif
