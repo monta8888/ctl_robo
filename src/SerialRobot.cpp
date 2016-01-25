@@ -1073,16 +1073,18 @@ int
 SerialRobot::loadMotion(char *name)
 {
   int ret = -1;
+
   std::string filem(name);
   std::string fileyaml(name);
   std::string filepseq(name);
   std::string filemseq(name);
 
+#if 0 // @@@
   filem += ".m";
   fileyaml += ".yaml";
   filepseq += ".pseq";
   filemseq += ".mseq";
-
+#endif
   if(loadMotionFromM((char *)filem.c_str()) > 0){
     ret = motion->getSize();
   }else if(loadMotionFromYaml((char *)fileyaml.c_str()) > 0){
@@ -1109,10 +1111,9 @@ SerialRobot::loadMotionFromM(char *fname)
   }
   clearMotion();
 
-  if(!FileExists(filename.c_str(),"")) { return -1; }
+  if(!FileExists(filename.c_str(),"m")) { return -1; } // @@@
 
-
-  clearMotion();
+  filename += ".m"; // @@@
   motion->loadMotionFromFile(filename.c_str());
 
   return motion->getSize();
@@ -1130,8 +1131,9 @@ SerialRobot::loadMotionFromPseq(char *fname)
   }
   clearMotion();
 
-  if(!FileExists(filename.c_str(),"")) { return -1; }
+  if(!FileExists(filename.c_str(),"pseq")) { return -1; } // @@@
 
+  filename += ".pseq"; // @@@
   motion->loadMotionFromPseqFile(filename.c_str(), this);
   return motion->getSize();
 }
@@ -1148,8 +1150,9 @@ SerialRobot::loadMotionFromMseq(char *fname)
   }
   clearMotion();
 
-  if(!FileExists(filename.c_str(),"")) { return -1; }
+  if(!FileExists(filename.c_str(),"mseq")) { return -1; } // @@@
 
+  filename += ".mseq"; // @@@
   motion->loadMotionFromMseqFile(filename.c_str(), this);
   return motion->getSize();
 }
@@ -1166,8 +1169,9 @@ SerialRobot::loadMotionFromYaml(char *fname)
   }
   clearMotion();
 
-  if(!FileExists(filename.c_str(),"")) { return -1; }
+  if(!FileExists(filename.c_str(),"yaml")) { return -1; } // @@@
 
+  filename += ".yaml"; // @@@
   motion->loadMotionFromYamlFile(filename.c_str(), this);
   return motion->getSize();
 }
@@ -1392,7 +1396,18 @@ SerialRobot::sendCommand(char *data, int len){
   if(this->connect() >0){
 
     LOCK_COM
+#if 0 // @@@
     res = com->sendData(data,len);
+#else
+    if (data[0] == 0x53) { // @@@
+      res = com->sendData(&data[2],(len-2)); // @@@
+//      com->printPacket(&data[2],len-2); // @@@
+    }
+    else if (data[0] == 0x54) {
+      res = com->sendData(&data[2],(len-3)); // @@@
+//      com->printPacket(&data[2],len-3); // @@@
+    }
+#endif // @@@
     UNLOCK_COM
     if(res < 0){
       com->printPacket(data,len);

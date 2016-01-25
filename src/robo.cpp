@@ -35,7 +35,8 @@ using namespace std;
  #ifdef WIN32
     char *devname = "COM1";
  #else
-    char *devname = "/dev/ttyMFD1";
+// @@@    char *devname = "/dev/ttyMFD1";
+    char *devname = "/dev/ttyUSB0";
  #endif
 
    /* Ctrl+C ‚ğ‰Ÿ‚µ‚½‚Æ‚«‚Ìˆ—‚ğ“o˜^ */

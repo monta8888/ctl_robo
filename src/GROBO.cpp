@@ -484,9 +484,9 @@ GR001::printVolts(int flag)
 int 
 GR001::checkConnection()
 {
+#if 0 // @@@
   char buf;
   char msg1[] = {0x41, 0x00};
-
   if(sendCommand(msg1, 2) < 0){
     std::cerr << "Error in checkConnection" << std::endl;
     return -1;
@@ -499,7 +499,19 @@ GR001::checkConnection()
     std::cerr << "Error in checkConnection : " << std::hex << std::showbase << buf << std::endl;
     return -1;
   }
+#else
+  char i;
+  char msg1[] = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x24, 0x01, 0x01, 0x01, 0x24};
 
+  for (i=0; i<20; i++) {
+    msg1[4]  = i;
+    msg1[10] = calcSum((char *)(&msg1[4]), 6);
+    if(sendCommand(msg1, 11) < 0){
+      std::cerr << "Error in checkServo" << std::endl;
+      return -1;
+    }
+  }
+#endif // @@@
   return 0;
 }
 
