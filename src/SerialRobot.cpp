@@ -460,8 +460,8 @@ RobotMotion::loadMotionFromMseqFile(const char *name, SerialRobot *r)
   topMap = doc.root->childNodes[0]->toMapping();
 
   if( topMap == NULL  
-	|| !topMap->equalTo("type", "MotionSeq")
-	|| (refs = topMap->getSequence("refs")) == NULL )
+	|| !topMap->equalTo((char*)"type", (char*)"MotionSeq")
+	|| (refs = topMap->getSequence((char*)"refs")) == NULL )
   {
     std::cerr << "Invalid Yaml format : " << name << std::endl;
     return false; 
@@ -472,19 +472,19 @@ RobotMotion::loadMotionFromMseqFile(const char *name, SerialRobot *r)
   int len = refs->size();
   double st = 0;
   double mt;
-  short deg = 0;
+//  short deg = 0;
 
   for(int i(0); i< len;i++){
     RobotPosture *rp;
 
 	YamlMapping *ref_i = refs->getMappingAt(i);
 
-	if(ref_i == NULL || ref_i->getScalar("time") == NULL)
+	if(ref_i == NULL || ref_i->getScalar((char*)"time") == NULL)
 	{
 		continue;
 	}
  
-	mt = ref_i->getScalar("time")->toInteger();
+	mt = ref_i->getScalar((char*)"time")->toInteger();
 
 	if(i==0){
       //  rp = new RobotPosture(numJoints);
@@ -498,9 +498,9 @@ RobotMotion::loadMotionFromMseqFile(const char *name, SerialRobot *r)
 
 	YamlSequence *joint_seq, *q_seq;
 
-	if( ref_i->getMapping("refer") == NULL || 
-		(joint_seq = ref_i->getMapping("refer")->getSequence("joints")) == NULL ||
-		(q_seq = ref_i->getMapping("refer")->getSequence("q")) == NULL )
+	if( ref_i->getMapping((char*)"refer") == NULL || 
+		(joint_seq = ref_i->getMapping((char*)"refer")->getSequence((char*)"joints")) == NULL ||
+		(q_seq = ref_i->getMapping((char*)"refer")->getSequence((char*)"q")) == NULL )
 	{
 		continue;
 	}
@@ -546,8 +546,8 @@ RobotMotion::loadMotionFromPseqFile(const char *name, SerialRobot *r)
   topMap = doc.root->childNodes[0]->toMapping();
 
   if( topMap == NULL  
-	|| !topMap->equalTo("type", "PoseSeq")
-	|| (refs = topMap->getSequence("refs")) == NULL )
+	|| !topMap->equalTo((char*)"type", (char*)"PoseSeq")
+	|| (refs = topMap->getSequence((char*)"refs")) == NULL )
   {
     std::cerr << "Invalid Yaml format : " << name << std::endl;
     return false; 
@@ -558,19 +558,19 @@ RobotMotion::loadMotionFromPseqFile(const char *name, SerialRobot *r)
   int len = refs->size();
   double st = 0;
   double mt;
-  short deg = 0;
+//  short deg = 0;
 
   for(int i(0); i< len;i++){
     RobotPosture *rp;
 
 	YamlMapping *ref_i = refs->getMappingAt(i);
 
-	if(ref_i == NULL || ref_i->getScalar("time") == NULL)
+	if(ref_i == NULL || ref_i->getScalar((char*)"time") == NULL)
 	{
 		continue;
 	}
  
-	mt = ref_i->getScalar("time")->toInteger();
+	mt = ref_i->getScalar((char*)"time")->toInteger();
 
 	if(i==0){
       //  rp = new RobotPosture(numJoints);
@@ -585,9 +585,9 @@ RobotMotion::loadMotionFromPseqFile(const char *name, SerialRobot *r)
 
 	YamlSequence *joint_seq, *q_seq;
 
-	if( ref_i->getMapping("refer") == NULL || 
-		(joint_seq = ref_i->getMapping("refer")->getSequence("joints")) == NULL ||
-		(q_seq = ref_i->getMapping("refer")->getSequence("q")) == NULL )
+	if( ref_i->getMapping((char*)"refer") == NULL || 
+		(joint_seq = ref_i->getMapping((char*)"refer")->getSequence((char*)"joints")) == NULL ||
+		(q_seq = ref_i->getMapping((char*)"refer")->getSequence((char*)"q")) == NULL )
 	{
 		continue;
 	}
@@ -634,8 +634,8 @@ RobotMotion::loadMotionFromYamlFile(const char *name, SerialRobot *r)
   topMap = doc.root->childNodes[0]->toMapping();
 
   if( topMap == NULL  
-	|| !topMap->equalTo("type", "BodyMotion")
-	|| (comps = topMap->getSequence("components")) == NULL )
+	|| !topMap->equalTo((char*)"type", (char*)"BodyMotion")
+	|| (comps = topMap->getSequence((char*)"components")) == NULL )
   {
     std::cerr << "Invalid Yaml format : " << name << std::endl;
     return false; 
@@ -647,26 +647,26 @@ RobotMotion::loadMotionFromYamlFile(const char *name, SerialRobot *r)
 	YamlMapping *m = comps->at(i)->toMapping();
 
 	if(m == NULL) continue;
-	if( m->equalTo("type", "MultiValueSeq") && 
-			m->equalTo("purpose", "JointPosition") )
+	if( m->equalTo((char*)"type", (char*)"MultiValueSeq") && 
+			m->equalTo((char*)"purpose", (char*)"JointPosition") )
 	{
       int frate, nFrames;
 
-	  if(m->getScalar("frameRate") == NULL ){
+	  if(m->getScalar((char*)"frameRate") == NULL ){
 		 frate = 10;
 	  }else{
-         frate = m->getScalar("frameRate")->toInteger();
+         frate = m->getScalar((char*)"frameRate")->toInteger();
 	  }
-	  if(m->getScalar("numFrames") == NULL){
+	  if(m->getScalar((char*)"numFrames") == NULL){
         nFrames = 0;
 	  }else{
-		nFrames = m->getScalar("numFrames")->toInteger();
+		nFrames = m->getScalar((char*)"numFrames")->toInteger();
 	  }
 
       double tm = 1000.0 / frate;
-      short deg=0;
+//      short deg=0;
 
-      frames = m->getSequence("frames");
+      frames = m->getSequence((char*)"frames");
 	  if(frames == NULL){
 		  break;
 	  }
@@ -855,7 +855,7 @@ RobotMotion::setForward( SerialRobot *r )
     {      0,   0, 250,   0,-1200,-250,   0, 1300,   0, 200,   0,-350,-200,   0,   0,-400,   0, 350,   0,   0}, // 04
     {      0,   0, 400,   0,-1200, -50,   0, 1200,   0, 450,  50,-650,-280, -20,   0,-200,   0, 350, 200,  20}, // 01
     {      0,   0, 250,   0,-1200,-250,   0, 1200,   0, 350,   0,-450,-150,   0,   0,-350,   0, 450, 150,   0}, // 00
-#endif                                                                 ª}‹tª       ª}‹tª  ª
+#endif /*                                                              ª}‹tª       ª}‹tª  ª */
   };
   int len = 20;
   double mt = 1;
@@ -910,7 +910,7 @@ RobotMotion::setBack( SerialRobot *r )
     {      0,   0,   0,   0,-1200,   0,   0, 1200,   0, 350,   0,-350, -50,   0,   0,-250,   0, 350, 150,   0}, // 04
     {      0,   0,   0,   0,-1200,   0,   0, 1200,   0, 400,  50,-650,-280,  20,   0,-350,   0, 350,  50,  20}, // 01
     {      0,   0,-100,   0,-1200, 100,   0, 1200,   0, 300,   0,-350,-100,   0,   0,-300,   0, 350, 100,   0}, // 00
-#endif                                                                 ª}‹tª       ª}‹tª  ª
+#endif /*                                                              ª}‹tª       ª}‹tª  ª */
   };
   int len = 20;
   double mt = 1;
@@ -966,7 +966,7 @@ RobotMotion::setLeft( SerialRobot *r )
     {    -50,-550, 400, 200,-1200,-200,   0, 1200,   0, 550,  50,-800,-350, 100,-100,-400, -50, 500, 200,   50},
     {   -100,   0,-500, 200,-1200, 500, 200, 1200,   0, 400,   0,-550,-200,   0,   0,-400,   0, 550, 200,   50},
     {      0,   0,-250,-100,-1200, 250,-100, 1200,   0, 400, 100,-550,-200, 100,   0,-400,-100, 550, 200, -100},
-#endif                                                                 ª}‹tª       ª}‹tª  ª
+#endif /*                                                              ª}‹tª       ª}‹tª  ª */
   };
   int len = 6;
 
@@ -1011,7 +1011,7 @@ RobotMotion::setRight( SerialRobot *r )
     {   -100, 500, 100,   0,-1300,-400, 200, 1200,-100, 400, 120,-500,-200,  20,   0,-550, -80, 800, 350, -130},
     {   -100,   0,-500, 200,-1200, 500, 200, 1200,   0, 400,   0,-550,-200,   0,   0,-400,   0, 550, 200,   50},
     {      0,   0,-250,-100,-1200, 250,-100, 1200,   0, 400, 100,-550,-200, 100,   0,-400,-100, 550, 200, -100},
-#endif                                                                 ª}‹tª       ª}‹tª  ª
+#endif /*                                                              ª}‹tª       ª}‹tª  ª */
   };
   int len = 6;
   double mt = 0;
@@ -1041,8 +1041,8 @@ RobotMotion::setRight( SerialRobot *r )
   Constructor
 */
 
-SerialRobot::SerialRobot(char *devname, int n): name("SerialRobot"),commandSize(0),timeout(500),motionTime(300),
-executeMotion(false),repeatCount(1),reverseFlag(0),commandCount(0),senseTime(300),motionDir("")
+SerialRobot::SerialRobot(char *devname, int n): name((char*)"SerialRobot"),motionDir((char*)""),motionTime(300),senseTime(300),timeout(500),
+repeatCount(1),reverseFlag(0),executeMotion(false),commandCount(0),commandSize(0)
 {
   joints = n;
   hThread  = 0;

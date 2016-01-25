@@ -442,14 +442,15 @@ GR001::printPosture()
 void 
 GR001::printCurrents()
 {
- char body[]={HEAD, BODY};
+#if 0
+  char body[]={HEAD, BODY};
   char r_arm[]={R_ARM0, R_ARM1, R_ARM2};
   char l_arm[]={L_ARM0, L_ARM1, L_ARM2};
   char arms[]={L_ARM0, L_ARM1, L_ARM2, R_ARM0, R_ARM1, R_ARM2};
   char r_leg[]={R_LEG0, R_LEG1, R_LEG2, R_KNEE, R_FOOT0, R_FOOT1};
   char l_leg[]={L_LEG0, L_LEG1, L_LEG2, L_KNEE, L_FOOT0, L_FOOT1};
   char legs[]={R_LEG0, R_LEG1, R_LEG2, R_KNEE, R_FOOT0, R_FOOT1, L_LEG0, L_LEG1, L_LEG2, L_KNEE, L_FOOT0, L_FOOT1};
-
+#endif
 
   fprintf(stderr,"HEAD:%5d BODY: %5d\n", Currents[HEAD],Currents[BODY]);
   fprintf(stderr,"R_ARM:%5d %5d %5d\n", Currents[R_ARM0],Currents[R_ARM1],Currents[R_ARM2]);
@@ -509,12 +510,12 @@ GR001::checkConnection()
   }
 #else
   char i;
-  char msg1[] = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x24, 0x01, 0x01, 0x01, 0x24};
+  unsigned char msg1[] = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x24, 0x01, 0x01, 0x01, 0x24};
 
   for (i=1; i<=20; i++) {
     msg1[4]  = i;
     msg1[10] = calcSum((char *)(&msg1[4]), 6);
-    if(sendCommand(msg1, 11) < 0){
+    if(sendCommand((char *)msg1, 11) < 0){
       std::cerr << "Error in checkServo" << std::endl;
       return -1;
     }

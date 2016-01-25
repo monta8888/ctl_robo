@@ -29,14 +29,15 @@ sighandler(int x)
 int
 main(int argc, char* argv[])
 {
+#ifdef EXEC_CONSOLE
   /*   •Ï”‚Ì’è‹`@*/
   char line[1024];
-
+#endif
 #ifdef WIN32
    char *devname = "COM1";
 #else
-   char *devname = "/dev/ttyMFD1";
-// @@@    char *devname = "/dev/ttyUSB0";
+   char *devname = (char*)"/dev/ttyMFD1";
+// @@@    char *devname = (char*)"/dev/ttyUSB0";
 #endif
 
   /* Ctrl+C ‚ğ‰Ÿ‚µ‚½‚Æ‚«‚Ìˆ—‚ğ“o˜^ */

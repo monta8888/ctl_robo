@@ -10,13 +10,13 @@
 /**
 
 */
-SerialCom::SerialCom():device(NULL),handle(H_NULL),mode(0),baudrate(DEFAULT_BAUD)
+SerialCom::SerialCom():device(NULL),baudrate(DEFAULT_BAUD),mode(0),handle(H_NULL)
 {
 }
 /**
 
 */
-SerialCom::SerialCom(char *devname):handle(H_NULL),mode(0),baudrate(DEFAULT_BAUD)
+SerialCom::SerialCom(char *devname):baudrate(DEFAULT_BAUD),mode(0),handle(H_NULL)
 {
   setDevPort(devname);
 }
@@ -317,9 +317,9 @@ int SerialCom::Write(char *data, int len){
   mraa_uart_flush(uart_01);
 #else // MACRO_MRAA
   int res;
-  int n=99;
   res = write(handle, data, len);
 #ifdef DELAY_DE_RE
+  int n=99;
   do { ioctl(this->handle, TIOCOUTQ, &n); } while (n);
 #endif
 #endif // MACRO_MRAA
