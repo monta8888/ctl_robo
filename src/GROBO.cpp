@@ -76,6 +76,9 @@ static const char jointIdToMotorIdMap[] = {
     3 /* R_SHOULDER_P */, 4 /* R_SHOULDER_R */, 5 /* R_ELBOW_P */,
     6 /* R_SHOULDER_P */, 7 /* R_SHOULDER_R */, 8 /* R_ELBOW_P */ };
 
+static int xx=0;
+static int yy=0;
+
 /**** Method for  GR001 ***/
 GR001::GR001(char *devname): SerialRobot(devname, N_JOINTS)
 {
@@ -198,7 +201,7 @@ GR001::getAngle(unsigned char id)
 
     delete buf;
   }else{
-	std::cerr<< "ERROR :getAngle" <<std::endl;
+	std::cerr<< "ERROR :getAngle:" << id <<std::endl;
 	return -10000;
   }
   return currentPosture->getDegree(id);
@@ -215,6 +218,7 @@ GR001::getCurrent(unsigned char id)
   buf = getMotorInfo(id, 0x30, 2);
   if(buf != NULL){
     Currents[id-1] = convC2S(&buf[7]);
+fprintf(stdout, "CUR[%02x %02x %02x %02x]\n", buf[0], buf[1], buf[2], buf[3]); // @@@
 	delete buf;
   }else{
 	std::cerr<< "ERROR :getCurrent" <<std::endl;
@@ -401,31 +405,31 @@ void
 GR001::printPosture()
 {
  
-  fprintf(stderr,"HEAD:              %4d\n", currentPosture->getDegree(2));
+  fprintf(stderr,"HEAD:              %5d\n", currentPosture->getDegree(2));
 
-  fprintf(stderr," ARM: %4d %4d %4d -+",
+  fprintf(stderr," ARM: %5d %5d %5d -+",
     currentPosture->getDegree(8), 
     currentPosture->getDegree(7), 
     currentPosture->getDegree(6));
-  fprintf(stderr,"- %4d %4d %4d \n", 
+  fprintf(stderr,"- %5d %5d %5d \n", 
     currentPosture->getDegree(3),
     currentPosture->getDegree(4),
     currentPosture->getDegree(5));
 
-  fprintf(stderr,"BODY:              %4d \n", currentPosture->getDegree(1));
-  fprintf(stderr," LEG:         %4d     %4d  \n", 
+  fprintf(stderr,"BODY:              %5d \n", currentPosture->getDegree(1));
+  fprintf(stderr," LEG:         %5d     %5d  \n", 
     currentPosture->getDegree(15), currentPosture->getDegree(9));
-  fprintf(stderr," LEG: %4d %4d %4d -+",
+  fprintf(stderr," LEG: %5d %5d %5d -+",
     currentPosture->getDegree(18), 
     currentPosture->getDegree(16),
     currentPosture->getDegree(17));
-  fprintf(stderr,"- %d %4d %4d \n",
+  fprintf(stderr,"- %5d %5d %5d \n",
     currentPosture->getDegree(11),
     currentPosture->getDegree(10), 
     currentPosture->getDegree(12));
-  fprintf(stderr,"FOOT:    %4d %4d   -+",
+  fprintf(stderr,"FOOT:    %5d %5d   -+",
     currentPosture->getDegree(20), currentPosture->getDegree(19));
-  fprintf(stderr,"-  %d %4d \n\n", 
+  fprintf(stderr,"-  %d %5d \n\n", 
     currentPosture->getDegree(13), currentPosture->getDegree(14));
 
   printCurrents();
@@ -443,12 +447,12 @@ GR001::printCurrents()
   char legs[]={R_LEG0, R_LEG1, R_LEG2, R_KNEE, R_FOOT0, R_FOOT1, L_LEG0, L_LEG1, L_LEG2, L_KNEE, L_FOOT0, L_FOOT1};
 
 
-  fprintf(stderr,"HEAD:%d BODY: %d\n", Currents[HEAD],Currents[BODY]);
-  fprintf(stderr,"R_ARM:%d %d %d\n", Currents[R_ARM0],Currents[R_ARM1],Currents[R_ARM2]);
-  fprintf(stderr,"L_ARM:%d %d %d\n", Currents[L_ARM0],Currents[L_ARM1],Currents[L_ARM2]);
-  fprintf(stderr,"R_LEG:%d %d %d %d %d %d\n",
+  fprintf(stderr,"HEAD:%5d BODY: %5d\n", Currents[HEAD],Currents[BODY]);
+  fprintf(stderr,"R_ARM:%5d %5d %5d\n", Currents[R_ARM0],Currents[R_ARM1],Currents[R_ARM2]);
+  fprintf(stderr,"L_ARM:%5d %5d %5d\n", Currents[L_ARM0],Currents[L_ARM1],Currents[L_ARM2]);
+  fprintf(stderr,"R_LEG:%5d %5d %5d %5d %5d %5d\n",
 	  Currents[R_LEG0],Currents[R_LEG1],Currents[R_LEG2],Currents[R_KNEE],Currents[R_FOOT0],Currents[R_FOOT1]);
-  fprintf(stderr,"L_LEG:%d %d %d %d %d %d\n",
+  fprintf(stderr,"L_LEG:%5d %5d %5d %5d %5d %5d\n",
 	  Currents[L_LEG0],Currents[L_LEG1],Currents[L_LEG2],Currents[L_KNEE],Currents[L_FOOT0],Currents[L_FOOT1]);
   fprintf(stderr,"\n");
 }
@@ -503,7 +507,7 @@ GR001::checkConnection()
   char i;
   char msg1[] = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x24, 0x01, 0x01, 0x01, 0x24};
 
-  for (i=0; i<20; i++) {
+  for (i=1; i<=20; i++) {
     msg1[4]  = i;
     msg1[10] = calcSum((char *)(&msg1[4]), 6);
     if(sendCommand(msg1, 11) < 0){
@@ -668,8 +672,10 @@ GR001::postureToCommand(RobotPosture *pos){
   for(int i=0; i<joints; i++){
     short posture = (short)pos->getDegree(i+1);
 	short mtm = (short)getTimeout()/10;
+//fprintf(stdout, "POS=%d TIM=%d ", posture, mtm);
     setDegMs((char *)(PosturePacket+i*5+10) , posture, mtm);
   }
+//fprintf(stdout, "\n");
 
   PosturePacket[109] = calcSum((char *)(PosturePacket+4), 105);
   setCommand((char *)PosturePacket, 110);
@@ -762,6 +768,11 @@ GR001::setFreeMotion(int x)
 	freeMotion=x;
 	return freeMotion;
 }
+
+// @@@
+#include <sys/time.h>
+#include <time.h>
+
 void 
 GR001::getPosture()
 {
@@ -770,7 +781,62 @@ GR001::getPosture()
   //unsigned int IDS[] = {13,14,19,20};
   unsigned char IDS[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
   int max_ids = 20;
+#if 0 // @@@
+{
+  struct timeval tv1;
+  struct timeval tv2;
+  struct timeval tv3;
+  struct timeval tv4;
+  struct timespec req;
+  struct timespec rem;
 
+  // timeval‚ð‰Šú‰»
+  timerclear(&tv1);
+  timerclear(&tv2);
+
+#if 0
+  // timeval‚ªÝ’è‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ð”»’è,•\Ž¦
+  fprintf(stdout, "timerisset tv1 = %d / tv2 = %d\n",
+          (timerisset(&tv1)),
+          (timerisset(&tv2)));
+#endif
+xx++;
+if (!(xx % 10)) { fprintf(stdout, "!!%d!!\n", yy); setTorque(1, (yy++ & 0x1)); }
+
+  // timeval‚Å‚ ‚étv1‚ðÝ’è
+  if (gettimeofday(&tv1, NULL)) { perror("failed to gettimeofday"); exit(1); }
+
+  getCurrent(1);
+
+  // timeval‚Å‚ ‚étv2‚ðÝ’è
+  if (gettimeofday(&tv2, NULL)) { perror("failed to gettimeofday"); exit(1); }
+#if 0
+  // timerval‚Ì“à—e‚ð•\Ž¦
+  fprintf(stdout, "tv1 sec = %ld / usec = %ld => %ld.%06ld\n",
+          tv1.tv_sec,
+          tv1.tv_usec,
+          tv1.tv_sec,
+          tv1.tv_usec
+          );
+  fprintf(stdout, "tv2 sec = %ld / usec = %ld => %ld.%06ld\n",
+          tv2.tv_sec,
+          tv2.tv_usec,
+          tv2.tv_sec,
+          tv2.tv_usec);
+  // timercmp‚Åtimeval‚ð”äŠr
+  char c = '=' + (timercmp(&tv1, &tv2, >)) - (timercmp(&tv1, &tv2, <));
+  fprintf(stdout, "tv1 %c tv2\n", c);
+#endif
+
+  // timeval‚Ì·•ªŽZo
+  timerclear(&tv3);
+  timersub(&tv2, &tv1, &tv3);
+//  fprintf(stdout, "tv2 - tv1 = %ld.%06ld\n",
+  fprintf(stdout, "%ld.%06ld\n",
+          tv3.tv_sec,
+          tv3.tv_usec);
+}
+#else // @@@
   for(i = 0 ; i < max_ids ; i++){
 	unsigned char id = IDS[i];
     if((val = getAngle(id)) == -10000){
@@ -795,5 +861,6 @@ GR001::getPosture()
 	}
 
   }
+#endif
   return; 
 }

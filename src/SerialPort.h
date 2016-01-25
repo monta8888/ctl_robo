@@ -6,6 +6,7 @@
 #ifndef __SERIAL_PORT_H__
 #define __SERIAL_PORT_H__
 
+#include <mraa.h> // @@@
 #include "CUtils.h"
 
 /*
@@ -117,6 +118,12 @@ public:
   int mode;      // Communication mode. mode=1 -> Non Blocking mode, other Blocking mode
 
   HANDLE handle; // Handle for serial communication
+  mraa_uart_context uart_01; // @@@
+  mraa_gpio_context gpio_20; // @@@
+  mraa_gpio_context gpio_25; // @@@
+  mraa_gpio_context gpio_26; // @@@
+  mraa_gpio_context gpio_35; // @@@
+  int send_len;
 };
 
 #endif

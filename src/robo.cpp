@@ -35,8 +35,8 @@ using namespace std;
  #ifdef WIN32
     char *devname = "COM1";
  #else
-// @@@    char *devname = "/dev/ttyMFD1";
-    char *devname = "/dev/ttyUSB0";
+    char *devname = "/dev/ttyMFD1";
+// @@@    char *devname = "/dev/ttyUSB0";
  #endif
 
    /* Ctrl+C を押したときの処理を登録 */
@@ -44,7 +44,7 @@ using namespace std;
 
    /* コマンドの引数でシリアルポートを指定する */
    if(argc > 1){
-     devname  = (char *)argv[1];
+//     devname  = (char *)argv[1];
    }
 
    /* GR001のクラスの初期化とロボットへの接続　*/
@@ -61,6 +61,42 @@ using namespace std;
    /* 動作ファイルのディレクトリを指定する　*/
    G_ROBO->setMotionDir("motion");
 
+   if(argc > 1){
+     if      (strcmp(argv[1], "f") == 0) { /* Forward */
+        std::cout << "FORWARD" << std::endl;
+        G_ROBO->selectMove(1);
+        G_ROBO->setMotionCount(1);
+        while(G_ROBO->isMoving());
+        loop = 0;
+     }else if(strcmp(argv[1], "b") == 0) { /* Back */
+        std::cout << "BACK" << std::endl;
+        G_ROBO->selectMove(2);
+        G_ROBO->setMotionCount(1);
+        while(G_ROBO->isMoving());
+        loop = 0;
+     }else if(strcmp(argv[1], "a") == 0) { /* Left */
+        std::cout << "LEFT" << std::endl;
+        G_ROBO->selectMove(3);
+        G_ROBO->setMotionCount(1);
+        while(G_ROBO->isMoving());
+        loop = 0;
+     }else if(strcmp(argv[1], "j") == 0) { /* Right */
+        std::cout << "RIGHT" << std::endl;
+        G_ROBO->selectMove(4);
+        G_ROBO->setMotionCount(1);
+        while(G_ROBO->isMoving());
+        loop = 0;
+     }else if(strcmp(argv[1], "i") == 0){ /* 初期化姿勢（中腰）になる */
+        std::cout << "INIT" << std::endl;
+        G_ROBO->initPosition();
+        while(G_ROBO->isMoving());
+        loop = 0;
+     }else if(strcmp(argv[1], "q") == 0){ /* コマンド入力ループを抜ける(終了) */
+        loop = 0;
+     }
+     /* ロボットの姿勢（モータの角度）などを表示する */
+     G_ROBO->printPosture();
+   }
    /* コマンド入力ループ　*/
    while(loop){
      /* コマンド入力プロンプトを出して、一行の入力を待つ */
@@ -78,7 +114,7 @@ using namespace std;
      }else if(strcmp(line, "Free") == 0){        /* 一定以上の負荷がかかれば、サーボOffになるモードへ移行する　*/
         std::cout << "SERVO FREE" << std::endl;
         G_ROBO->setFreeMotion(1);
-     }else if(strcmp(line, "Init") == 0){        /* 初期化姿勢（中腰）になる */
+     }else if(strcmp(line, "i") == 0){        /* 初期化姿勢（中腰）になる */
         std::cout << "INIT" << std::endl;
         G_ROBO->initPosition();
      }else if(strcmp(line, "PrintMotion") == 0){ /* 現在の動作を表示する　*/
@@ -93,7 +129,23 @@ using namespace std;
         std::cout << "RECONNECT" << std::endl;
         G_ROBO->closePort();
         G_ROBO->connect();
-     }else if(strcmp(line, "quit") == 0){        /* コマンド入力ループを抜ける(終了) */
+     }else if(strcmp(line, "f") == 0) { /* Forward */
+        std::cout << "[[FORWARD]]" << std::endl;
+        G_ROBO->selectMove(1);
+        G_ROBO->setMotionCount(1);
+     }else if(strcmp(line, "b") == 0) { /* Back */
+        std::cout << "[[BACK]]" << std::endl;
+        G_ROBO->selectMove(2);
+        G_ROBO->setMotionCount(1);
+     }else if(strcmp(line, "a") == 0) { /* Left */
+        std::cout << "[[LEFT]]" << std::endl;
+        G_ROBO->selectMove(3);
+        G_ROBO->setMotionCount(1);
+     }else if(strcmp(line, "j") == 0) { /* Right */
+        std::cout << "[[RIGHT]]" << std::endl;
+        G_ROBO->selectMove(4);
+        G_ROBO->setMotionCount(1);
+     }else if(strcmp(line, "q") == 0){        /* コマンド入力ループを抜ける(終了) */
         loop = 0;
      }else{                                      /* 入力された文字列の動作パターンファイルを探して、存在すれば実行する */
         std::cout << "Motion = "<< line << std::endl;

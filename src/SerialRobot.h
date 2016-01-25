@@ -240,6 +240,14 @@ public:
 
   RobotMotion *dupMotion();
 
+  /*
+   *  moving function
+   */
+  void setForward( SerialRobot *r );
+  void setBack( SerialRobot *r );
+  void setLeft( SerialRobot *r );
+  void setRight( SerialRobot *r );
+
 public:
   std::vector<RobotPosture *> motion;  //  current motion data
   int numJoints;                       // Number of joints
@@ -436,6 +444,11 @@ public:
   virtual int stabilizer() = 0;
 
   void setMotionDir(const char *dir);
+
+  /*
+   *  moving function
+   */
+  int selectMove( int n );
 
 public:
   char *name;

@@ -7,17 +7,26 @@
 #include "SerialPort.h"
 #include <iostream>
 
-
+#define DEV_INTERSIL
+//#define DEBUG_CODE
+//#define MACRO_MRAA
+//#define DELAY_DE_RE
+#define BAUD115
+#ifdef BAUD115
+#define DEFAULT_BAUD B115200
+#else
+#define DEFAULT_BAUD B460800
+#endif
 /**
 
 */
-SerialCom::SerialCom():device(NULL),handle(H_NULL),mode(0),baudrate(B115200)
+SerialCom::SerialCom():device(NULL),handle(H_NULL),mode(0),baudrate(DEFAULT_BAUD)
 {
 }
 /**
 
 */
-SerialCom::SerialCom(char *devname):handle(H_NULL),mode(0),baudrate(B115200)
+SerialCom::SerialCom(char *devname):handle(H_NULL),mode(0),baudrate(DEFAULT_BAUD)
 {
   setDevPort(devname);
 }
@@ -100,7 +109,36 @@ SerialCom::openPort()
      handle = H_NULL;
    return -1;
   }
+  return (int)handle;
 #else
+
+#ifdef MACRO_MRAA // @@@
+  char* board_name = mraa_get_platform_name();
+//  fprintf(stdout, "hello mraa\n Version: %s\n Running on %s\n", mraa_get_version(), board_name);
+
+//  gpio_25 = mraa_gpio_init(25);
+//  gpio_26 = mraa_gpio_init(26);
+//  gpio_35 = mraa_gpio_init(35);
+//  mraa_gpio_use_mmaped(gpio_20, 1);
+//  mraa_gpio_dir(gpio_25, MRAA_GPIO_OUT);
+//  mraa_gpio_dir(gpio_26, MRAA_GPIO_IN);
+//  mraa_gpio_dir(gpio_35, MRAA_GPIO_OUT);
+
+//  uart_01 = mraa_uart_init(0);
+  uart_01 = mraa_uart_init_raw(device);
+  if (uart_01 == NULL) {
+    fprintf(stderr, "UART failed to setup\n");
+    uart_01 = H_NULL;
+    return -1;
+  }
+  printf("Device path: %s\n", mraa_uart_get_dev_path(uart_01));
+  mraa_uart_set_baudrate(uart_01, DEFAULT_BAUD);
+  mraa_uart_set_mode(uart_01, 8, MRAA_UART_PARITY_NONE, 1);
+  mraa_uart_set_flowcontrol(uart_01, 0, 0);
+  mraa_uart_set_timeout(uart_01, 0, 0, 0);
+  handle = 4;
+  return (int)1;
+#else // MACRO_MRAA
   struct termios tio;
 
   if(mode == 1){
@@ -112,17 +150,27 @@ SerialCom::openPort()
     handle = H_NULL;
     return -1;
   }
+  printf("handle: %d / mode:%d\n", handle, mode);
+
+  // @@@
+  mraa_init();
+  gpio_20 = mraa_gpio_init(20); // GPIO12/J18-7
+  mraa_gpio_use_mmaped(gpio_20, 1); // FastIO
+  mraa_gpio_dir(gpio_20, MRAA_GPIO_OUT);
 
   memset(&tio, 0, sizeof(tio));
+//  tio.c_iflag = IXON|IXOFF;
   tio.c_cflag = CS8|CREAD|CLOCAL;
+//  tio.c_cflag = CS8|CREAD|CLOCAL|CRTSCTS;
   tio.c_cc[VMIN] = 1;
   cfsetospeed(&tio, baudrate);
   cfsetispeed(&tio, baudrate);
   tcsetattr(handle, TCSANOW, &tio);
+  return (int)handle;
+#endif // MACRO_MRAA
 
 #endif
 
-  return (int)handle;
 }
 
 /*
@@ -140,11 +188,17 @@ SerialCom::setBaudrate(int b)
 	dcb.BaudRate = baudrate;
 	SetCommState(handle, &dcb);
 #else
+
+#ifdef MACRO_MRAA // @@@
+  mraa_uart_set_baudrate(uart_01, DEFAULT_BAUD);
+#else // MACRO_MRAA
     struct termios tio;
     tcgetattr(handle, &tio);
     cfsetospeed(&tio, b);
     cfsetispeed(&tio, b);
     tcsetattr(handle, TCSANOW, &tio);
+#endif // MACRO_MRAA
+
 #endif
   }
   return b;
@@ -158,7 +212,17 @@ void SerialCom::closePort(){
 #ifdef WIN32
     CloseHandle(this->handle);
 #else
-	close(this->handle);
+
+#ifdef MACRO_MRAA // @@@
+  mraa_uart_stop(uart_01);
+  mraa_deinit();
+#else // MACRO_MRAA
+  close(this->handle);
+  // @@@
+  mraa_gpio_dir(gpio_20, MRAA_GPIO_IN);
+  mraa_deinit();
+#endif // MACRO_MRAA
+
 #endif
     this->handle = H_NULL;
   }
@@ -186,7 +250,13 @@ int SerialCom::Read(char *data, int len){
   }
   return dwRead;
 #else
+
+#ifdef MACRO_MRAA // @@@
+  return mraa_uart_read(uart_01, data, len);
+#else // MACRO_MRAA
   return read(handle, data, len);
+#endif // MACRO_MRAA
+
 #endif
 }
 
@@ -243,7 +313,21 @@ int SerialCom::Write(char *data, int len){
   }
   return dwWrite;
 #else
-  return write(handle, data, len);
+
+#ifdef MACRO_MRAA // @@@
+  int res;
+  res = mraa_uart_write(uart_01, data, len);
+  mraa_uart_flush(uart_01);
+#else // MACRO_MRAA
+  int res;
+  int n=99;
+  res = write(handle, data, len);
+#ifdef DELAY_DE_RE
+  do { ioctl(this->handle, TIOCOUTQ, &n); } while (n);
+#endif
+#endif // MACRO_MRAA
+  return res;
+
 #endif
 }
 
@@ -253,6 +337,8 @@ int SerialCom::Write(char *data, int len){
 int SerialCom::sendData(char *data, int len){
   int c, sent=0;
 
+  this->clearBuffer(); // @@@
+  mraa_gpio_write(gpio_20, 1); // @@@
   do{
     c = Write(data+sent, len-sent);
     if(c < 0){
@@ -261,7 +347,17 @@ int SerialCom::sendData(char *data, int len){
     }
     sent += c;
   }while(sent < len);
-
+#ifdef DELAY_DE_RE
+#ifdef BAUD115
+  usleep(570); // @@@115200
+#else
+  usleep(40); // @@@460800
+#endif
+#endif
+  mraa_gpio_write(gpio_20, 0); // @@@
+#ifdef DEV_INTERSIL
+  if (sent) { Read(data, sent); }
+#endif
   return sent;
 }
 
@@ -281,7 +377,8 @@ int SerialCom::chkBuffer(){
 #ifndef TIOCINQ
 #define TIOCINQ FIONREAD
 #endif
-
+  // @@@
+  mraa_gpio_write(gpio_20, 0);
   ioctl(this->handle, TIOCINQ, &n);
 #endif
 
@@ -298,10 +395,11 @@ int SerialCom::clearBuffer(){
 
   for(i=0;i<n;i++)
   {
-
     if(Read(&c, 1) != 0){
+#if 0 // @@@ UART->RS485 tuned
       std::cerr << "ERROR!!: fail to read byte." << std::endl;
       return -1;
+#endif
     }
   }
   return n;
