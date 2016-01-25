@@ -163,7 +163,6 @@ private:
 public:
   RobotMotion *record;
 
-
 private:
   unsigned short *Currents;
   unsigned short *Volts;

@@ -12,6 +12,20 @@
 extern "C" {
 #endif
 
+// @@@
+#define DEV_INTERSIL
+#define DEBUG_PRINT
+#define EXEC_CONSOLE
+//#define MACRO_MRAA
+//#define CTL_DE_RE
+//#define DELAY_DE_RE
+#define BAUD115
+#ifdef BAUD115
+#define DEFAULT_BAUD B115200
+#else
+#define DEFAULT_BAUD B460800
+#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -76,9 +76,6 @@ static const char jointIdToMotorIdMap[] = {
     3 /* R_SHOULDER_P */, 4 /* R_SHOULDER_R */, 5 /* R_ELBOW_P */,
     6 /* R_SHOULDER_P */, 7 /* R_SHOULDER_R */, 8 /* R_ELBOW_P */ };
 
-static int xx=0;
-static int yy=0;
-
 /**** Method for  GR001 ***/
 GR001::GR001(char *devname): SerialRobot(devname, N_JOINTS)
 {
@@ -134,7 +131,9 @@ GR001::setTorque( unsigned char id, char val)
   ServoPacket[10] = calcSum((char *)(&ServoPacket[4]), 6);
 
   if(sendCommand((char *)ServoPacket, 11) < 0){
+#ifdef DEBUG_PRINT
     std::cerr<< " Fail to setTorque: id=" << std::dec << (int)id <<std::endl;
+#endif
     return -1;
   }
   return 0;
@@ -201,7 +200,9 @@ GR001::getAngle(unsigned char id)
 
     delete buf;
   }else{
+#ifdef DEBUG_PRINT
 	std::cerr<< "ERROR :getAngle:" << id <<std::endl;
+#endif
 	return -10000;
   }
   return currentPosture->getDegree(id);
@@ -221,7 +222,9 @@ GR001::getCurrent(unsigned char id)
 fprintf(stdout, "CUR[%02x %02x %02x %02x]\n", buf[0], buf[1], buf[2], buf[3]); // @@@
 	delete buf;
   }else{
+#ifdef DEBUG_PRINT
 	std::cerr<< "ERROR :getCurrent" <<std::endl;
+#endif
     return -10000;
   }
 
@@ -404,7 +407,7 @@ GR001::setDegMs(char *data, short deg, unsigned short cs)
 void 
 GR001::printPosture()
 {
- 
+#ifdef DEBUG_PRINT
   fprintf(stderr,"HEAD:              %5d\n", currentPosture->getDegree(2));
 
   fprintf(stderr," ARM: %5d %5d %5d -+",
@@ -433,6 +436,7 @@ GR001::printPosture()
     currentPosture->getDegree(13), currentPosture->getDegree(14));
 
   printCurrents();
+#endif
 }
 
 void 
@@ -769,9 +773,13 @@ GR001::setFreeMotion(int x)
 	return freeMotion;
 }
 
+#if 0 // @@@
 // @@@
 #include <sys/time.h>
 #include <time.h>
+static int xx=0;
+static int yy=0;
+#endif
 
 void 
 GR001::getPosture()

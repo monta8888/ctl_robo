@@ -1045,8 +1045,8 @@ SerialRobot::SerialRobot(char *devname, int n): name("SerialRobot"),commandSize(
 executeMotion(false),repeatCount(1),reverseFlag(0),commandCount(0),senseTime(300),motionDir("")
 {
   joints = n;
-  hThread = NULL;
-  hThread2 = NULL; // @@@
+  hThread  = 0;
+  hThread2 = 0; // @@@
   threadLoop = 0;
 
 #ifdef WIN32
@@ -1110,7 +1110,9 @@ SerialRobot::connect()
 {
   if(com->isConnected() > 0 ){ return 1; }
   if(openPort()  < 0){
-    std::cerr << "Fail to open " << com->device <<std::endl;
+#ifdef DEBUG_PRINT
+      std::cerr << "Fail to open " << com->device <<std::endl;
+#endif
       return -1;
   }
   if(checkConnection() < 0){
@@ -1173,7 +1175,9 @@ SerialRobot::setDefaultMotionTime(int sval)
   if(sval > 0 && sval < 10000){
      motionTime = sval;
   }else{
+#ifdef DEBUG_PRINT
     std::cerr << "Invalid value = " <<  sval << "cs" << std::endl;
+#endif
   }
   return motionTime;
 }
@@ -1527,7 +1531,9 @@ SerialRobot::setMotionCount(int count)
 int 
 SerialRobot::initPosition()
 {
-	initPosture->printPosture();
+#ifdef DEBUG_PRINT
+  initPosture->printPosture();
+#endif
   targetPosture->copyPosture(initPosture);
   startMotion();
 
@@ -1596,15 +1602,10 @@ SerialRobot::startThread2()
 {
   THREAD_FUNC thread_chk_controller(void *args);
 
-  jsf = open("/dev/input/js0", O_RDONLY);
-  if(jsf < 0){
-    std::cerr << "fail open startThread2" << std::endl;
-    jsf = H_NULL;
-    return -1;
-  }
-
   if(Pthread_Create(&hThread2, NULL, thread_chk_controller, this) != 0){
+#ifdef DEBUG_PRINT
     std::cerr << "fail create Thread2" << std::endl;
+#endif
     threadLoop = 0;
     return 0;
   }
@@ -1627,6 +1628,9 @@ SerialRobot::stopThread()
   if(hThread2== 0) return 1; // @@@
 #endif
 
+  mraa_gpio_dir(gpio__20, MRAA_GPIO_IN); // @@@
+  mraa_deinit();
+
   Pthread_Join(hThread, NULL);
   Pthread_Mutex_Destroy(&mutex_com);
   Pthread_Mutex_Destroy(&mutex_motion);
@@ -1639,9 +1643,10 @@ SerialRobot::stopThread()
   mutex_motion = NULL;
 #endif
 
-  hThread = NULL;
-  hThread2 = NULL; // @@@
+  hThread  = 0;
+  hThread2 = 0; // @@@
   close(jsf);
+
   return 0;
 }
 
@@ -1766,10 +1771,31 @@ SerialRobot::svc()
   }
 }
 
-void
-SerialRobot::svc2() // @@@
+int
+SerialRobot::svc2(int *cnt, int *stat) // @@@
 {
 //  std::cerr << "svc2" << std::endl;
+  if (!*stat) {
+    mraa_init();
+    gpio__20 = mraa_gpio_init(20); // GPIO12/J18-7
+    mraa_gpio_use_mmaped(gpio__20, 1); // FastIO
+    mraa_gpio_dir(gpio__20, MRAA_GPIO_OUT);
+    *stat = 1;
+  }
+  if(jsf == H_NULL) {
+    jsf = open("/dev/input/js0", O_RDONLY);
+    if(jsf < 0){
+//      std::cerr << "fail open startThread2" << std::endl;
+      jsf = H_NULL;
+      *cnt = *cnt + 1;
+      mraa_gpio_write(gpio__20, (*cnt&1));
+      return -1;
+    }
+    else {
+      mraa_gpio_write(gpio__20, 1);
+    }
+  }
+
   if(jsf != H_NULL)
   {
     js_event js;
@@ -1779,10 +1805,16 @@ SerialRobot::svc2() // @@@
     case JS_EVENT_AXIS:
       if (js.number < 4) {
 //       std::cerr << "AXIS[" << js.number << "]: " << js.value << std::endl;
+#ifdef DEBUG_PRINT
         printf("AXIS[%d]: %d  \n", js.number, js.value );
+#endif
       }
       break;
     case JS_EVENT_BUTTON:
+//       std::cerr << "BUTTON[" << js.number << "]: " << js.value << std::endl;
+#ifdef DEBUG_PRINT
+      printf("BUTTON[%d]: %d  \n", js.number, js.value );
+#endif
       switch(js.number) {
       case 0:
         if (js.value) { initPosition(); }
@@ -1800,11 +1832,11 @@ SerialRobot::svc2() // @@@
         if (js.value) { selectMove(3); setMotionCount(1); }
         break;
       }
-//       std::cerr << "BUTTON[" << js.number << "]: " << js.value << std::endl;
-      printf("BUTTON[%d]: %d  \n", js.number, js.value );
+//      printf("BUTTON fin\n");
       break;
     }
   }
+  return 0;
 }
 
 /******** Thread Function *****/
@@ -1846,8 +1878,9 @@ THREAD_FUNC thread_execution(void *args)
       Sleep(0);
     }
   }
+#ifdef DEBUG_PRINT
   std::cerr << "Thread terminated." << std::endl;
-
+#endif
 #ifdef WIN32
   return;
 #else
@@ -1857,13 +1890,18 @@ THREAD_FUNC thread_execution(void *args)
 
 THREAD_FUNC thread_chk_controller(void *args)
 {
+  int led_cnt =0;
+  int led_stat=0;
   SerialRobot *robot = (SerialRobot *)args;
 
   while(robot->isActive()){
-    robot->svc2();
+    if (robot->svc2(&led_cnt, &led_stat)) {
+      Sleep(500);
+    }
   }
+#ifdef DEBUG_PRINT
   std::cerr << "Thread terminated2." << std::endl;
-
+#endif
 #ifdef WIN32
   return;
 #else

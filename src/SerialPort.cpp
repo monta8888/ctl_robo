@@ -7,16 +7,6 @@
 #include "SerialPort.h"
 #include <iostream>
 
-#define DEV_INTERSIL
-//#define DEBUG_CODE
-//#define MACRO_MRAA
-//#define DELAY_DE_RE
-#define BAUD115
-#ifdef BAUD115
-#define DEFAULT_BAUD B115200
-#else
-#define DEFAULT_BAUD B460800
-#endif
 /**
 
 */
@@ -114,6 +104,7 @@ SerialCom::openPort()
 
 #ifdef MACRO_MRAA // @@@
   char* board_name = mraa_get_platform_name();
+  int brate;
 //  fprintf(stdout, "hello mraa\n Version: %s\n Running on %s\n", mraa_get_version(), board_name);
 
 //  gpio_25 = mraa_gpio_init(25);
@@ -131,8 +122,9 @@ SerialCom::openPort()
     uart_01 = H_NULL;
     return -1;
   }
-  printf("Device path: %s\n", mraa_uart_get_dev_path(uart_01));
-  mraa_uart_set_baudrate(uart_01, DEFAULT_BAUD);
+  brate = (DEFAULT_BAUD == B115200) ? 115200 : 460800;
+  printf("Device path: %s Brate: %d\n", mraa_uart_get_dev_path(uart_01), brate);
+  mraa_uart_set_baudrate(uart_01, brate);
   mraa_uart_set_mode(uart_01, 8, MRAA_UART_PARITY_NONE, 1);
   mraa_uart_set_flowcontrol(uart_01, 0, 0);
   mraa_uart_set_timeout(uart_01, 0, 0, 0);
@@ -150,14 +142,13 @@ SerialCom::openPort()
     handle = H_NULL;
     return -1;
   }
-  printf("handle: %d / mode:%d\n", handle, mode);
-
-  // @@@
+//  printf("handle: %d / mode:%d\n", handle, mode);
+#ifdef CTL_DE_RE // @@@
   mraa_init();
   gpio_20 = mraa_gpio_init(20); // GPIO12/J18-7
   mraa_gpio_use_mmaped(gpio_20, 1); // FastIO
   mraa_gpio_dir(gpio_20, MRAA_GPIO_OUT);
-
+#endif // CTL_DE_RE
   memset(&tio, 0, sizeof(tio));
 //  tio.c_iflag = IXON|IXOFF;
   tio.c_cflag = CS8|CREAD|CLOCAL;
@@ -190,7 +181,9 @@ SerialCom::setBaudrate(int b)
 #else
 
 #ifdef MACRO_MRAA // @@@
-  mraa_uart_set_baudrate(uart_01, DEFAULT_BAUD);
+  int brate;
+  brate = (DEFAULT_BAUD == B115200) ? 115200 : 460800;
+  mraa_uart_set_baudrate(uart_01, brate);
 #else // MACRO_MRAA
     struct termios tio;
     tcgetattr(handle, &tio);
@@ -219,8 +212,10 @@ void SerialCom::closePort(){
 #else // MACRO_MRAA
   close(this->handle);
   // @@@
+#ifdef CTL_DE_RE // @@@
   mraa_gpio_dir(gpio_20, MRAA_GPIO_IN);
   mraa_deinit();
+#endif // CTL_DE_RE
 #endif // MACRO_MRAA
 
 #endif
@@ -283,7 +278,9 @@ int SerialCom::recieveData(char *data, int len){
   do{
     c = Read(data+recieved, len-recieved);
     if(c < 0){
-    std::cerr << "ERROR in read" << std::endl;
+#ifdef DEBUG_PRINT
+      std::cerr << "ERROR in read" << std::endl;
+#endif
       return -1;
     }
   recieved += c;
@@ -338,11 +335,15 @@ int SerialCom::sendData(char *data, int len){
   int c, sent=0;
 
   this->clearBuffer(); // @@@
+#ifdef CTL_DE_RE // @@@
   mraa_gpio_write(gpio_20, 1); // @@@
+#endif // CTL_DE_RE
   do{
     c = Write(data+sent, len-sent);
     if(c < 0){
+#ifdef DEBUG_PRINT
     std::cerr << "ERROR in SerialCom::sendData" << std::endl;
+#endif
     return -1;
     }
     sent += c;
@@ -354,7 +355,9 @@ int SerialCom::sendData(char *data, int len){
   usleep(40); // @@@460800
 #endif
 #endif
+#ifdef CTL_DE_RE // @@@
   mraa_gpio_write(gpio_20, 0); // @@@
+#endif // CTL_DE_RE
 #ifdef DEV_INTERSIL
   if (sent) { Read(data, sent); }
 #endif
@@ -377,8 +380,9 @@ int SerialCom::chkBuffer(){
 #ifndef TIOCINQ
 #define TIOCINQ FIONREAD
 #endif
-  // @@@
+#ifdef CTL_DE_RE // @@@
   mraa_gpio_write(gpio_20, 0);
+#endif // CTL_DE_RE
   ioctl(this->handle, TIOCINQ, &n);
 #endif
 
@@ -436,7 +440,9 @@ int SerialCom::getMode(){
  */
 int SerialCom::setMode(int mode){
   if(handle != H_NULL){
+#ifdef DEBUG_PRINT
     std::cerr << "Fail to chandge mode" << std::endl;
+#endif
   }else{
     mode = mode;
   }

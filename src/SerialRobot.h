@@ -435,7 +435,7 @@ public:
    */
 //  virtual void svc();
   void svc();
-  void svc2();
+  int svc2(int *cnt, int *stat);
 
   /*
    *  convert a porture to a command packet to the robot
@@ -493,6 +493,7 @@ public:
   SerialCom *com;               // serial port to control a robot.
 
   HANDLE jsf; // @@@
+  mraa_gpio_context gpio__20; // @@@
 };
 
 

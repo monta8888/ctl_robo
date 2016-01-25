@@ -119,7 +119,9 @@ public:
 
   HANDLE handle; // Handle for serial communication
   mraa_uart_context uart_01; // @@@
+#ifdef CTL_DE_RE // @@@
   mraa_gpio_context gpio_20; // @@@
+#endif // CTL_DE_RE
   mraa_gpio_context gpio_25; // @@@
   mraa_gpio_context gpio_26; // @@@
   mraa_gpio_context gpio_35; // @@@
