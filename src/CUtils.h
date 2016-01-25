@@ -39,7 +39,7 @@ extern "C" {
 #include <sys/ioctl.h>
 #include <ctype.h>
 
-#defien C_DECLSPEC
+#define C_DECLSPEC
 #endif
 
 
@@ -63,7 +63,7 @@ void Pthread_Join(HANDLE hT, void *thread_return);
 void Pthread_Exit(HANDLE hT);
 #else
 #define HANDLE      int
-#define DEV_STR      "/dev/ttyS%d"
+#define DEV_STR      "/dev/ttyMFD%d"
 #define SSCANF      sscanf
 #define SPRINTF      sprintf
 #define Sleep(n)    usleep(n*1000)

@@ -314,7 +314,8 @@ YamlSequence::at(int x)
 {
 	try{
 		return value.at(x);
-	}catch(std::out_of_range& e){
+//	}catch(std::out_of_range& e){
+	}catch(char *e){
 		return NULL;
 	}
 }
@@ -325,7 +326,8 @@ YamlSequence::getScalarAt(int x)
 	try{
 		YamlNode *n = value.at(x);
 		return n->toScalar();
-	}catch(std::out_of_range& e){
+//	}catch(std::out_of_range& e){
+	}catch(char *e){
 		return NULL;
 	}
 }
@@ -336,7 +338,8 @@ YamlSequence::getMappingAt(int x)
 	try{
 		YamlNode *n = value.at(x);
 		return n->toMapping();
-	}catch(std::out_of_range& e){
+//	}catch(std::out_of_range& e){
+	}catch(char *e){
 		return NULL;
 	}
 }
@@ -346,7 +349,8 @@ YamlSequence::getSequenceAt(int x)
 	try{
 		YamlNode *n = value.at(x);
 		return n->toSequence();
-	}catch(std::out_of_range& e){
+//	}catch(std::out_of_range& e){
+	}catch(char *e){
 		return NULL;
 	}
 }

@@ -48,7 +48,11 @@
  *  Control class for GR001:G-ROBOT
  * 
  */
+#ifdef WIN32
 class __declspec(dllexport) GR001: public SerialRobot
+#else
+class GR001: public SerialRobot
+#endif
 {
 public:
   /*
