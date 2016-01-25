@@ -1628,7 +1628,10 @@ SerialRobot::stopThread()
   if(hThread2== 0) return 1; // @@@
 #endif
 
-  mraa_gpio_dir(gpio__20, MRAA_GPIO_IN); // @@@
+  mraa_gpio_close(gpio20_D3);
+  mraa_gpio_close(gpio21_D0);
+  mraa_gpio_close(gpio33_D1);
+  mraa_gpio_close(gpio36_D2);
   mraa_deinit();
 
   Pthread_Join(hThread, NULL);
@@ -1777,9 +1780,18 @@ SerialRobot::svc2(int *cnt, int *stat) // @@@
 //  std::cerr << "svc2" << std::endl;
   if (!*stat) {
     mraa_init();
-    gpio__20 = mraa_gpio_init(20); // GPIO12/J18-7
-    mraa_gpio_use_mmaped(gpio__20, 1); // FastIO
-    mraa_gpio_dir(gpio__20, MRAA_GPIO_OUT);
+    gpio20_D3 = mraa_gpio_init(20); // GPIO 12/J18-7
+    mraa_gpio_use_mmaped(gpio20_D3, 1); // FastIO
+    mraa_gpio_dir(gpio20_D3, MRAA_GPIO_OUT);
+    gpio21_D0 = mraa_gpio_init(21); // GPIO183/J18-8
+    mraa_gpio_use_mmaped(gpio21_D0, 1); // FastIO
+    mraa_gpio_dir(gpio21_D0, MRAA_GPIO_OUT);
+    gpio33_D1 = mraa_gpio_init(33); // GPIO 48/J19-6
+    mraa_gpio_use_mmaped(gpio33_D1, 1); // FastIO
+    mraa_gpio_dir(gpio33_D1, MRAA_GPIO_OUT);
+    gpio36_D2 = mraa_gpio_init(36); // GPIO 14/J19-9
+    mraa_gpio_use_mmaped(gpio36_D2, 1); // FastIO
+    mraa_gpio_dir(gpio36_D2, MRAA_GPIO_OUT);
     *stat = 1;
   }
   if(jsf == H_NULL) {
@@ -1787,12 +1799,86 @@ SerialRobot::svc2(int *cnt, int *stat) // @@@
     if(jsf < 0){
 //      std::cerr << "fail open startThread2" << std::endl;
       jsf = H_NULL;
+#if 0 // @@@ test
+//      std::cerr << "LED Counter" << *cnt << std::endl;
+      switch (*cnt) {
+      case 0:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 0);
+        mraa_gpio_write(gpio33_D1, 0);
+        mraa_gpio_write(gpio21_D0, 0);
+        break;
+      case 1:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 0);
+        mraa_gpio_write(gpio33_D1, 0);
+        mraa_gpio_write(gpio21_D0, 1);
+        break;
+      case 2:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 0);
+        mraa_gpio_write(gpio33_D1, 1);
+        mraa_gpio_write(gpio21_D0, 0);
+        break;
+      case 3:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 0);
+        mraa_gpio_write(gpio33_D1, 1);
+        mraa_gpio_write(gpio21_D0, 1);
+        break;
+      case 4:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 1);
+        mraa_gpio_write(gpio33_D1, 0);
+        mraa_gpio_write(gpio21_D0, 0);
+        break;
+      case 5:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 1);
+        mraa_gpio_write(gpio33_D1, 0);
+        mraa_gpio_write(gpio21_D0, 1);
+        break;
+      case 6:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 1);
+        mraa_gpio_write(gpio33_D1, 1);
+        mraa_gpio_write(gpio21_D0, 0);
+        break;
+      case 7:
+        mraa_gpio_write(gpio20_D3, 0);
+        mraa_gpio_write(gpio36_D2, 1);
+        mraa_gpio_write(gpio33_D1, 1);
+        mraa_gpio_write(gpio21_D0, 1);
+        break;
+      case 8:
+        mraa_gpio_write(gpio20_D3, 1);
+        mraa_gpio_write(gpio36_D2, 0);
+        mraa_gpio_write(gpio33_D1, 0);
+        mraa_gpio_write(gpio21_D0, 0);
+        break;
+      case 9:
+        mraa_gpio_write(gpio20_D3, 1);
+        mraa_gpio_write(gpio36_D2, 0);
+        mraa_gpio_write(gpio33_D1, 0);
+        mraa_gpio_write(gpio21_D0, 1);
+        break;
+      default:
+        *cnt = 0;
+        break;
+      }
+#endif // @@@ test
+      mraa_gpio_write(gpio20_D3, (*cnt&1));
+      mraa_gpio_write(gpio36_D2, (*cnt&1));
+      mraa_gpio_write(gpio33_D1, (*cnt&1));
+      mraa_gpio_write(gpio21_D0, (*cnt&1));
       *cnt = *cnt + 1;
-      mraa_gpio_write(gpio__20, (*cnt&1));
       return -1;
     }
     else {
-      mraa_gpio_write(gpio__20, 1);
+      mraa_gpio_write(gpio20_D3, 0);
+      mraa_gpio_write(gpio36_D2, 0);
+      mraa_gpio_write(gpio33_D1, 0);
+      mraa_gpio_write(gpio21_D0, 1);
     }
   }
 

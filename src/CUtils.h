@@ -14,10 +14,10 @@ extern "C" {
 
 // @@@
 #define DEV_INTERSIL
-#define DEBUG_PRINT
-#define EXEC_CONSOLE
+//#define DEBUG_PRINT
+//#define EXEC_CONSOLE
 //#define MACRO_MRAA
-//#define CTL_DE_RE
+//#define 	CTL_DE_RE
 //#define DELAY_DE_RE
 #define BAUD115
 #ifdef BAUD115

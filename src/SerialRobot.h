@@ -493,7 +493,10 @@ public:
   SerialCom *com;               // serial port to control a robot.
 
   HANDLE jsf; // @@@
-  mraa_gpio_context gpio__20; // @@@
+  mraa_gpio_context gpio20_D3; // J18-7 @@@
+  mraa_gpio_context gpio21_D0; // J18-8 @@@
+  mraa_gpio_context gpio33_D1; // J19-6 @@@
+  mraa_gpio_context gpio36_D2; // J19-9 @@@
 };
 
 
