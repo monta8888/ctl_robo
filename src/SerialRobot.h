@@ -453,6 +453,18 @@ public:
    *  moving function
    */
   int selectMove( int n );
+  void set_Noled();
+  void set_Dpled();
+  void set_0led();
+  void set_1led();
+  void set_2led();
+  void set_3led();
+  void set_4led();
+  void set_5led();
+  void set_6led();
+  void set_7led();
+  void set_8led();
+  void set_9led();
 
 public:
   char *name;
@@ -497,6 +509,15 @@ public:
   mraa_gpio_context gpio21_D0; // J18-8 @@@
   mraa_gpio_context gpio33_D1; // J19-6 @@@
   mraa_gpio_context gpio36_D2; // J19-9 @@@
+
+  mraa_gpio_context gpio45_g; // J20-4 @@@
+  mraa_gpio_context gpio46_f; // J20-5 @@@
+  mraa_gpio_context gpio47_e; // J20-6 @@@
+  mraa_gpio_context gpio48_d; // J20-7 @@@
+  mraa_gpio_context gpio49_a; // J20-8 @@@
+  mraa_gpio_context gpio50_b; // J20-9 @@@
+  mraa_gpio_context gpio54_c; // J20-13 @@@
+  mraa_gpio_context gpio55_dp;// J20-14 @@@
 };
 
 
