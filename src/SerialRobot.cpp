@@ -1987,6 +1987,20 @@ SerialRobot::svc2(int *cnt, int *stat) // @@@
       mraa_gpio_write(gpio33_D1, (*cnt&1));
       mraa_gpio_write(gpio21_D0, (*cnt&1));
 #elif defined(CTL_8GPIO)
+#if 0 // test
+  switch(*cnt&0xf) {
+  case 0: set_0led(); break;
+  case 1: set_1led(); break;
+  case 2: set_2led(); break;
+  case 3: set_3led(); break;
+  case 4: set_4led(); break;
+  case 5: set_5led(); break;
+  case 6: set_6led(); break;
+  case 7: set_7led(); break;
+  case 8: set_8led(); break;
+  case 9: set_9led(); break;
+  }
+#endif
       if (*cnt&1) { set_Dpled(); } else { set_Noled(); }
 #endif
       *cnt = *cnt + 1;

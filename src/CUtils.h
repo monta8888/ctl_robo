@@ -16,8 +16,8 @@ extern "C" {
 #define DEV_INTERSIL
 #define CTL_8GPIO
 //#define CTL_7SEG
-//#define DEBUG_PRINT
-//#define EXEC_CONSOLE
+#define DEBUG_PRINT
+#define EXEC_CONSOLE
 //#define MACRO_MRAA
 //#define CTL_DE_RE
 //#define DELAY_DE_RE
