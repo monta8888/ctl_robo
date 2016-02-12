@@ -515,10 +515,16 @@ GR001::checkConnection()
   for (i=1; i<=20; i++) {
     msg1[4]  = i;
     msg1[10] = calcSum((char *)(&msg1[4]), 6);
+#if 1
     if(sendCommand((char *)msg1, 11) < 0){
       std::cerr << "Error in checkServo" << std::endl;
       return -1;
     }
+#else
+    while( (sendCommand((char *)msg1, 11) < 0) || (getAngle(i)) == -10000) ){
+      ;
+    }
+#endif
   }
 #endif // @@@
   return 0;

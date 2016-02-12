@@ -6,9 +6,10 @@
 #ifndef __SERIAL_PORT_H__
 #define __SERIAL_PORT_H__
 
-#include <mraa.h> // @@@
 #include "CUtils.h"
-
+#if defined(MACRO_MRAA) || defined(CTL_7SEG) || defined(CTL_8GPIO) // @@@
+#include <mraa.h>
+#endif
 /*
  * Baudrate 
  */
@@ -118,13 +119,15 @@ public:
   int mode;      // Communication mode. mode=1 -> Non Blocking mode, other Blocking mode
 
   HANDLE handle; // Handle for serial communication
+#ifdef MACRO_MRAA // @@@
   mraa_uart_context uart_01; // @@@
-#ifdef CTL_DE_RE // @@@
-  mraa_gpio_context gpio_20; // @@@
-#endif // CTL_DE_RE
   mraa_gpio_context gpio_25; // @@@
   mraa_gpio_context gpio_26; // @@@
   mraa_gpio_context gpio_35; // @@@
+#endif // MACRO_MRAA
+#ifdef CTL_DE_RE // @@@
+  mraa_gpio_context gpio_20; // @@@
+#endif // CTL_DE_RE
   int send_len;
 };
 

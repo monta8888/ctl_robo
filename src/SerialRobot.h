@@ -218,6 +218,11 @@ public:
   bool loadMotionFromYamlFile(const char *name, SerialRobot *r);
   
   /*
+   * load motion data from mtn formatted file.
+   */
+  bool loadMotionFromMtnFile(const char *name, SerialRobot *r);
+  
+  /*
    * save current motion date to yaml formatted file.
    */
   bool saveMotionToPseqFile(const char *name, SerialRobot *r);
@@ -313,6 +318,8 @@ public:
   int loadMotionFromPseq(char *fname);
 
   int loadMotionFromMseq(char *fname);
+
+  int loadMotionFromMtn(char *fname);
   /*
    * save a current motion to the file.
    */
@@ -453,6 +460,7 @@ public:
    *  moving function
    */
   int selectMove( int n );
+#ifdef CTL_8GPIO
   void set_Noled();
   void set_Dpled();
   void set_0led();
@@ -465,6 +473,7 @@ public:
   void set_7led();
   void set_8led();
   void set_9led();
+#endif
 
 public:
   char *name;
@@ -505,11 +514,12 @@ public:
   SerialCom *com;               // serial port to control a robot.
 
   HANDLE jsf; // @@@
+#ifdef CTL_7SEG
   mraa_gpio_context gpio20_D3; // J18-7 @@@
   mraa_gpio_context gpio21_D0; // J18-8 @@@
   mraa_gpio_context gpio33_D1; // J19-6 @@@
   mraa_gpio_context gpio36_D2; // J19-9 @@@
-
+#elif defined(CTL_8GPIO)
   mraa_gpio_context gpio45_g; // J20-4 @@@
   mraa_gpio_context gpio46_f; // J20-5 @@@
   mraa_gpio_context gpio47_e; // J20-6 @@@
@@ -518,6 +528,7 @@ public:
   mraa_gpio_context gpio50_b; // J20-9 @@@
   mraa_gpio_context gpio54_c; // J20-13 @@@
   mraa_gpio_context gpio55_dp;// J20-14 @@@
+#endif
 };
 
 

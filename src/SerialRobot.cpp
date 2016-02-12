@@ -707,6 +707,100 @@ RobotMotion::loadMotionFromYamlFile(const char *name, SerialRobot *r)
   }
 }
 
+bool 
+RobotMotion::loadMotionFromMtnFile(const char *name, SerialRobot *r)
+{
+  std::ifstream ifs;
+  ifs.open(name);
+
+  if( !ifs.fail() ){
+    clear();
+//    double st = 0;
+    char line[1024];
+
+    if( !ifs.eof() ){
+      ifs.getline(line,1024);
+      std::istringstream iss(line);
+//      iss.str(line.substr(16,17));
+      char str[10];
+      int num;
+      iss >> str;
+      iss >> num;
+std::cerr << "HEAD[" << str << ":" << num << std::endl;
+    }
+    if( !ifs.eof() ){
+      ifs.getline(line,1024);
+      std::istringstream iss(line);
+      int num;
+      iss >> num;
+std::cerr << "POSNUM[" << num << std::endl;
+    }
+
+    if( !ifs.eof() ){
+      ifs.getline(line,1024);
+      ifs.getline(line,1024);
+      std::istringstream iss(line);
+      char str[4];
+      int num;
+      iss >> str;
+      iss >> num;
+std::cerr << "KKKK[" << str << ":" << num << std::endl;
+    }
+    if( !ifs.eof() ){
+      ifs.getline(line,1024);
+      std::istringstream iss(&line[4]);
+//      iss.str(buffer.substr(4,1024));
+      char str[1024];
+      iss >> str;
+std::cerr << "PPPP[" << str << std::endl;
+    }
+
+    if( !ifs.eof() ){
+      ifs.getline(line,1024);
+      ifs.getline(line,1024);
+      std::istringstream iss(line);
+      char str[4];
+      int num;
+      iss >> str;
+      iss >> num;
+std::cerr << "KKKK[" << str << ":" << num << std::endl;
+    }
+    if( !ifs.eof() ){
+      ifs.getline(line,1024);
+      std::istringstream iss(&line[4]);
+//      iss.str(buffer.substr(4,1024));
+      char str[1024];
+      iss >> str;
+std::cerr << "PPPP[" << str << std::endl;
+    }
+#if 0
+    while( !ifs.eof() ){
+      double mt;
+      ifs.getline(line,1024);
+      std::istringstream sfs(line);
+      sfs >> mt;
+      if(sfs.fail()) { break; }
+      RobotPosture *rp = new RobotPosture(numJoints);
+      rp->motionTime = mt - st;
+      st = mt;
+      for(int i=0;i < numJoints;i++){
+        int deg;
+        sfs >> deg;
+        if(sfs.fail()) { deg = 0; }
+        rp->setDegree(i+1, deg);
+      }
+      motion.push_back( rp );
+    }
+#endif
+    ifs.close();
+    return true;
+  }else{
+    std::cerr << "Faile to open " << name << std::endl;
+  }
+
+  return false;
+}
+
 
 /** Save **/
 bool 
@@ -1323,6 +1417,7 @@ SerialRobot::loadMotion(char *name)
   std::string fileyaml(name);
   std::string filepseq(name);
   std::string filemseq(name);
+  std::string filemtn(name); // @@@
 
 #if 0 // @@@
   filem += ".m";
@@ -1337,6 +1432,8 @@ SerialRobot::loadMotion(char *name)
   }else if(loadMotionFromPseq((char *)filepseq.c_str()) > 0){
 	ret = motion->getSize();
   }else if(loadMotionFromMseq((char *)filemseq.c_str()) > 0){
+	ret = motion->getSize();
+  }else if(loadMotionFromMtn((char *)filemseq.c_str()) > 0){ // @@@
 	ret = motion->getSize();
   }else{
 	std::cout << "No such a motion, "<< name << std::endl;
@@ -1418,6 +1515,25 @@ SerialRobot::loadMotionFromYaml(char *fname)
 
   filename += ".yaml"; // @@@
   motion->loadMotionFromYamlFile(filename.c_str(), this);
+  return motion->getSize();
+}
+
+int // @@@
+SerialRobot::loadMotionFromMtn(char *fname)
+{
+  std::string filename;
+
+  if(motionDir == ""){
+	  filename = fname;
+  }else{
+      filename = motionDir + FileDelim + fname;
+  }
+  clearMotion();
+
+  if(!FileExists(filename.c_str(),"mtn")) { return -1; } // @@@
+
+  filename += ".mtn";
+  motion->loadMotionFromMtnFile(filename.c_str(), this);
   return motion->getSize();
 }
 
@@ -1619,118 +1735,118 @@ SerialRobot::set_0led()
 void
 SerialRobot::set_1led()
 {
-        mraa_gpio_write(gpio45_g, 0); //
-        mraa_gpio_write(gpio46_f, 0); //
-        mraa_gpio_write(gpio47_e, 0); //
-        mraa_gpio_write(gpio48_d, 0); //
-        mraa_gpio_write(gpio49_a, 0); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 0); //
+  mraa_gpio_write(gpio46_f, 0); //
+  mraa_gpio_write(gpio47_e, 0); //
+  mraa_gpio_write(gpio48_d, 0); //
+  mraa_gpio_write(gpio49_a, 0); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_2led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 0); //
-        mraa_gpio_write(gpio47_e, 1); //
-        mraa_gpio_write(gpio48_d, 1); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 0); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 0); //
+  mraa_gpio_write(gpio47_e, 1); //
+  mraa_gpio_write(gpio48_d, 1); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 0); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_3led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 0); //
-        mraa_gpio_write(gpio47_e, 0); //
-        mraa_gpio_write(gpio48_d, 1); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 0); //
+  mraa_gpio_write(gpio47_e, 0); //
+  mraa_gpio_write(gpio48_d, 1); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_4led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 1); //
-        mraa_gpio_write(gpio47_e, 0); //
-        mraa_gpio_write(gpio48_d, 0); //
-        mraa_gpio_write(gpio49_a, 0); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 1); //
+  mraa_gpio_write(gpio47_e, 0); //
+  mraa_gpio_write(gpio48_d, 0); //
+  mraa_gpio_write(gpio49_a, 0); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_5led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 1); //
-        mraa_gpio_write(gpio47_e, 0); //
-        mraa_gpio_write(gpio48_d, 1); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 0); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 1); //
+  mraa_gpio_write(gpio47_e, 0); //
+  mraa_gpio_write(gpio48_d, 1); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 0); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_6led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 1); //
-        mraa_gpio_write(gpio47_e, 1); //
-        mraa_gpio_write(gpio48_d, 1); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 0); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 1); //
+  mraa_gpio_write(gpio47_e, 1); //
+  mraa_gpio_write(gpio48_d, 1); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 0); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_7led()
 {
-        mraa_gpio_write(gpio45_g, 0); //
-        mraa_gpio_write(gpio46_f, 1); //
-        mraa_gpio_write(gpio47_e, 0); //
-        mraa_gpio_write(gpio48_d, 0); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 0); //
+  mraa_gpio_write(gpio46_f, 1); //
+  mraa_gpio_write(gpio47_e, 0); //
+  mraa_gpio_write(gpio48_d, 0); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_8led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 1); //
-        mraa_gpio_write(gpio47_e, 1); //
-        mraa_gpio_write(gpio48_d, 1); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 1); //
+  mraa_gpio_write(gpio47_e, 1); //
+  mraa_gpio_write(gpio48_d, 1); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 
 void
 SerialRobot::set_9led()
 {
-        mraa_gpio_write(gpio45_g, 1); //
-        mraa_gpio_write(gpio46_f, 1); //
-        mraa_gpio_write(gpio47_e, 0); //
-        mraa_gpio_write(gpio48_d, 1); //
-        mraa_gpio_write(gpio49_a, 1); //
-        mraa_gpio_write(gpio50_b, 1); //
-        mraa_gpio_write(gpio54_c, 1); //
-        mraa_gpio_write(gpio55_dp,0); //
+  mraa_gpio_write(gpio45_g, 1); //
+  mraa_gpio_write(gpio46_f, 1); //
+  mraa_gpio_write(gpio47_e, 0); //
+  mraa_gpio_write(gpio48_d, 1); //
+  mraa_gpio_write(gpio49_a, 1); //
+  mraa_gpio_write(gpio50_b, 1); //
+  mraa_gpio_write(gpio54_c, 1); //
+  mraa_gpio_write(gpio55_dp,0); //
 }
 #endif
 
@@ -1784,11 +1900,23 @@ SerialRobot::stopThread()
   if(hThread2== 0) return 1; // @@@
 #endif
 
+#ifdef CTL_7SEG
   mraa_gpio_close(gpio20_D3);
   mraa_gpio_close(gpio21_D0);
   mraa_gpio_close(gpio33_D1);
   mraa_gpio_close(gpio36_D2);
   mraa_deinit();
+#elif defined(CTL_8GPIO)
+  mraa_gpio_close(gpio45_g);
+  mraa_gpio_close(gpio46_f);
+  mraa_gpio_close(gpio47_e);
+  mraa_gpio_close(gpio48_d);
+  mraa_gpio_close(gpio49_a);
+  mraa_gpio_close(gpio50_b);
+  mraa_gpio_close(gpio54_c);
+  mraa_gpio_close(gpio55_dp);
+  mraa_deinit();
+#endif
 
   Pthread_Join(hThread, NULL);
   Pthread_Mutex_Destroy(&mutex_com);
@@ -1935,6 +2063,7 @@ SerialRobot::svc2(int *cnt, int *stat) // @@@
 {
 //  std::cerr << "svc2" << std::endl;
   if (!*stat) {
+#ifdef CTL_7SEG
     mraa_init();
     gpio20_D3 = mraa_gpio_init(20); // GPIO 12/J18-7
     mraa_gpio_use_mmaped(gpio20_D3, 1); // FastIO
@@ -1948,7 +2077,8 @@ SerialRobot::svc2(int *cnt, int *stat) // @@@
     gpio36_D2 = mraa_gpio_init(36); // GPIO 14/J19-9
     mraa_gpio_use_mmaped(gpio36_D2, 1); // FastIO
     mraa_gpio_dir(gpio36_D2, MRAA_GPIO_OUT);
-
+#elif defined(CTL_8GPIO)
+    mraa_init();
     gpio45_g = mraa_gpio_init(45); // GPIO 45/J20-4
     mraa_gpio_use_mmaped(gpio45_g, 1); // FastIO
     mraa_gpio_dir(gpio45_g, MRAA_GPIO_OUT);
@@ -1973,6 +2103,7 @@ SerialRobot::svc2(int *cnt, int *stat) // @@@
     gpio55_dp= mraa_gpio_init(55); // GPIO 55/J20-14
     mraa_gpio_use_mmaped(gpio55_dp, 1); // FastIO
     mraa_gpio_dir(gpio55_dp, MRAA_GPIO_OUT);
+#endif
     *stat = 1;
   }
   if(jsf == H_NULL) {
