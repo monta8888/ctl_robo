@@ -520,6 +520,7 @@ GR001::checkConnection()
       std::cerr << "Error in checkServo" << std::endl;
       return -1;
     }
+    Sleep(100);
 #else
     while( (sendCommand((char *)msg1, 11) < 0) || (getAngle(i)) == -10000) ){
       ;
