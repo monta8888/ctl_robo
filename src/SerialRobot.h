@@ -271,7 +271,8 @@ public:
     Constructor: require 2 arguments, 
     first argument is a device name and second one is a number of robot's joints.
   */
-  SerialRobot(char *devname, int n);
+  SerialRobot(char *devname, int brate, int n);
+
   /**
     Deconstructor: stop a backgroud thread and close a serial port.
   */

@@ -77,7 +77,7 @@ static const char jointIdToMotorIdMap[] = {
     6 /* R_SHOULDER_P */, 7 /* R_SHOULDER_R */, 8 /* R_ELBOW_P */ };
 
 /**** Method for  GR001 ***/
-GR001::GR001(char *devname): SerialRobot(devname, N_JOINTS)
+GR001::GR001(char *devname, int brate): SerialRobot(devname, brate, N_JOINTS)
 {
   Currents= new unsigned short[N_JOINTS];
   Volts= new unsigned short[N_JOINTS];
@@ -201,7 +201,7 @@ GR001::getAngle(unsigned char id)
     delete buf;
   }else{
 #ifdef DEBUG_PRINT
-	std::cerr<< "ERROR :getAngle:" << id <<std::endl;
+	std::cerr<< "ERROR :getAngle:" << std::dec << (int)id <<std::endl;
 #endif
 	return -10000;
   }
@@ -509,25 +509,100 @@ GR001::checkConnection()
     return -1;
   }
 #else
+
+#if 1 // LongPacket
+  unsigned char msg1[] = {
+       0x53 ,0x32 ,0xfa,0xaf ,0x00 ,0x00 ,0x24 ,0x02
+      ,0x14
+      ,0x01 ,0x01
+      ,0x02 ,0x01
+      ,0x03 ,0x01
+      ,0x04 ,0x01
+      ,0x05 ,0x01
+      ,0x06 ,0x01
+      ,0x07 ,0x01
+      ,0x08 ,0x01
+      ,0x09 ,0x01
+      ,0x0a ,0x01
+      ,0x0b ,0x01
+      ,0x0c ,0x01
+      ,0x0d ,0x01
+      ,0x0e ,0x01
+      ,0x0f ,0x01
+      ,0x10 ,0x01
+      ,0x11 ,0x01
+      ,0x12 ,0x01
+      ,0x13 ,0x01
+      ,0x14 ,0x01
+      ,0x1b
+  };
+  msg1[49] = calcSum((char *)(&msg1[4]), 45);
+  if(sendCommand((char *)msg1, 50) < 0){
+    std::cerr << "Error in checkServo" << std::endl;
+    return -1;
+  }
+  Sleep(100);
+#else // ShortPacket
   char i;
   unsigned char msg1[] = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x24, 0x01, 0x01, 0x01, 0x24};
-
   for (i=1; i<=20; i++) {
     msg1[4]  = i;
     msg1[10] = calcSum((char *)(&msg1[4]), 6);
-#if 1
     if(sendCommand((char *)msg1, 11) < 0){
       std::cerr << "Error in checkServo" << std::endl;
       return -1;
     }
     Sleep(100);
-#else
-    while( (sendCommand((char *)msg1, 11) < 0) || (getAngle(i)) == -10000) ){
-      ;
-    }
-#endif
   }
+#endif // XXXPacket
+
 #endif // @@@
+  return 0;
+}
+
+int 
+GR001::changeBaudRate(int n)
+{
+  char i;
+  unsigned char baudrate115[]  = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x06, 0x01, 0x01, 0x07, 0x00};
+  unsigned char baudrate460[]  = {0x53, 0x09, 0xfa, 0xaf, 0x01, 0x00, 0x06, 0x01, 0x01, 0x0a, 0x0d};
+  unsigned char write_flash[]  = {0x53, 0x08, 0xfa, 0xaf, 0x01, 0x40, 0xff, 0x00, 0x00, 0xbe};
+  unsigned char reboot_servo[] = {0x53, 0x08, 0xfa, 0xaf, 0x01, 0x20, 0xff, 0x00, 0x00, 0xde};
+  for (i=1; i<=20; i++) {
+    std::cerr<< " !!! ChangeBaudRate:" << std::dec << (int)n <<std::endl;
+    if (n == 460) {
+      baudrate460[4]  = i;
+      baudrate460[10] = calcSum((char *)(&baudrate460[4]), 6);
+      if(sendCommand((char *)baudrate460, 11) < 0){
+        std::cerr << "Error in changeBaudRate1" << std::endl;
+        return -1;
+      }
+    }
+    else {
+      baudrate115[4]  = i;
+      baudrate115[10] = calcSum((char *)(&baudrate115[4]), 6);
+      if(sendCommand((char *)baudrate115, 11) < 0){
+        std::cerr << "Error in changeBaudRate1" << std::endl;
+        return -1;
+      }
+    }
+    std::cerr<< " !!! WriteFlash:" << std::dec << (int)i <<std::endl;
+    write_flash[4]  = i;
+    write_flash[9] = calcSum((char *)(&write_flash[4]), 5);
+    if(sendCommand((char *)write_flash, 10) < 0){
+      std::cerr << "Error in changeBaudRate2" << std::endl;
+      return -1;
+    }
+    Sleep(1000);
+
+    std::cerr<< " !!! RebootServo:" << std::dec << (int)i <<std::endl;
+    reboot_servo[4]  = i;
+    reboot_servo[9] = calcSum((char *)(&reboot_servo[4]), 5);
+    if(sendCommand((char *)reboot_servo, 10) < 0){
+      std::cerr << "Error in changeBaudRate3" << std::endl;
+      return -1;
+    }
+  }
   return 0;
 }
 
@@ -545,7 +620,7 @@ GR001::connect(int n)
     for(i=0;i<20;i++){
 
       SPRINTF(cdev, DEV_STR, i);
-    setDevice(cdev);
+      setDevice(cdev);
       if((c=openPort()) < 0){
         continue; 
       }
@@ -557,10 +632,11 @@ GR001::connect(int n)
     std::cerr << "Open Comm : " << cdev << std::endl;
       return 0;
     }
-  }else{
+  }
+  else{
 
     SPRINTF(cdev, DEV_STR, n); 
-  setDevice(cdev);
+    setDevice(cdev);
     if(openPort()  < 0){
       std::cerr << "Fain to open " << cdev <<std::endl;
       return -1;

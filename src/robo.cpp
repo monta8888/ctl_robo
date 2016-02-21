@@ -39,17 +39,27 @@ main(int argc, char* argv[])
    char *devname = (char*)"/dev/ttyMFD1";
 // @@@    char *devname = (char*)"/dev/ttyUSB0";
 #endif
+   int  baudrate = 115, br;
 
   /* Ctrl+C を押したときの処理を登録 */
   signal(SIGINT, sighandler);
 
   /* コマンドの引数でシリアルポートを指定する */
   if(argc > 1){
-     devname  = (char *)argv[1];
+     br = atoi( argv[1] ); // 引数１がbaudrateの場合
+     if (br == 115 || br == 460) {
+       baudrate = br;
+     }
+     else {
+       devname  = (char *)argv[1];
+     }
+  }
+  if(argc > 2){
+     baudrate = atoi( argv[2] ); // 引数２がbaudrateの場合
   }
 
   /* GR001のクラスの初期化とロボットへの接続　*/
-  G_ROBO = new GR001((char *)devname);
+  G_ROBO = new GR001((char *)devname, baudrate);
   if( G_ROBO->connect() < 0 ){
     std::cerr << "Error: can't find G-Robot: " <<  devname << std::endl;
   }
@@ -65,6 +75,7 @@ main(int argc, char* argv[])
   /* 動作ファイルのディレクトリを指定する　*/
   G_ROBO->setMotionDir("motion");
 
+#if 0 // @@@ test
   if(argc > 1){
     if      (strcmp(argv[1], "f") == 0) { /* Forward */
        std::cout << "FORWARD" << std::endl;
@@ -101,6 +112,7 @@ main(int argc, char* argv[])
     /* ロボットの姿勢（モータの角度）などを表示する */
     G_ROBO->printPosture();
   }
+#endif
 #ifdef EXEC_CONSOLE
   /* コマンド入力ループ　*/
   while(loop){
@@ -119,10 +131,16 @@ main(int argc, char* argv[])
     }else if(strcmp(line, "Free") == 0){        /* 一定以上の負荷がかかれば、サーボOffになるモードへ移行する　*/
        std::cout << "SERVO FREE" << std::endl;
        G_ROBO->setFreeMotion(1);
+    }else if(strcmp(line, "115") == 0){         /* 115bps通信に変更する */
+       std::cout << "CHANGE 115bps" << std::endl;
+       G_ROBO->changeBaudRate(115);
+    }else if(strcmp(line, "460") == 0){         /* 460bps通信に変更する */
+       std::cout << "CHANGE 460bps" << std::endl;
+       G_ROBO->changeBaudRate(460);
     }else if(strcmp(line, "i") == 0){        /* 初期化姿勢（中腰）になる */
        std::cout << "INIT" << std::endl;
        G_ROBO->initPosition();
-    }else if(strcmp(line, "PrintMotion") == 0){ /* 現在の動作を表示する　*/
+    }else if(strcmp(line, "p") == 0){ /* 現在の動作を表示する　*/
        G_ROBO->record->printMotion();
     }else if(strcmp(line, "Start") == 0){       /* 現在の動作を実行　*/
        std::cout << "START" << std::endl;

@@ -39,7 +39,7 @@ public:
    * Constrauctor
    */
   SerialCom();
-  SerialCom(char *devname);
+  SerialCom(char *devname, int brate);
   /*
    * Deconstructor
    */

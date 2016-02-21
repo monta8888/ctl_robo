@@ -10,15 +10,16 @@
 /**
 
 */
-SerialCom::SerialCom():device(NULL),baudrate(DEFAULT_BAUD),mode(0),handle(H_NULL)
+SerialCom::SerialCom():device(NULL),mode(0),handle(H_NULL)
 {
 }
 /**
 
 */
-SerialCom::SerialCom(char *devname):baudrate(DEFAULT_BAUD),mode(0),handle(H_NULL)
+SerialCom::SerialCom(char *devname, int brate):mode(0),handle(H_NULL)
 {
   setDevPort(devname);
+  baudrate = (brate == 115) ? B115200 : B460800;
 }
 
 /**
@@ -122,8 +123,10 @@ SerialCom::openPort()
     uart_01 = H_NULL;
     return -1;
   }
-  brate = (DEFAULT_BAUD == B115200) ? 115200 : 460800;
+  brate = (baudrate == B115200) ? 115200 : 460800;
+#ifdef DEBUG_PRINT
   printf("Device path: %s Brate: %d\n", mraa_uart_get_dev_path(uart_01), brate);
+#endif
   mraa_uart_set_baudrate(uart_01, brate);
   mraa_uart_set_mode(uart_01, 8, MRAA_UART_PARITY_NONE, 1);
   mraa_uart_set_flowcontrol(uart_01, 0, 0);
@@ -142,7 +145,9 @@ SerialCom::openPort()
     handle = H_NULL;
     return -1;
   }
-//  printf("handle: %d / mode:%d\n", handle, mode);
+#ifdef DEBUG_PRINT
+  printf("dev: %s brate: %d handle: %d / mode:%d\n", device, (baudrate == B115200) ? 115200 : 460800, handle, mode);
+#endif
 #ifdef CTL_DE_RE // @@@
   mraa_init();
   gpio_20 = mraa_gpio_init(20); // GPIO12/J18-7
@@ -182,7 +187,7 @@ SerialCom::setBaudrate(int b)
 
 #ifdef MACRO_MRAA // @@@
   int brate;
-  brate = (DEFAULT_BAUD == B115200) ? 115200 : 460800;
+  brate = (baudrate == B115200) ? 115200 : 460800;
   mraa_uart_set_baudrate(uart_01, brate);
 #else // MACRO_MRAA
     struct termios tio;
@@ -273,6 +278,9 @@ int SerialCom::recieveData(char *data, int len){
 
   if(i >= 100) {
     this->clearBuffer();
+#ifdef DEBUG_PRINT
+//    std::cerr << "ERROR in waiting read" << std::endl;
+#endif
     return -1;
   }
   do{
@@ -283,7 +291,7 @@ int SerialCom::recieveData(char *data, int len){
 #endif
       return -1;
     }
-  recieved += c;
+    recieved += c;
   } while(recieved < len);
 
   return len;
@@ -359,7 +367,15 @@ int SerialCom::sendData(char *data, int len){
   mraa_gpio_write(gpio_20, 0); // @@@
 #endif // CTL_DE_RE
 #ifdef DEV_INTERSIL
-  if (sent) { Read(data, sent); }
+  if (sent) {
+    c = Read(data, sent);
+    if(c < 0){
+#ifdef DEBUG_PRINT
+      std::cerr << "ERROR in write after read" << std::endl;
+#endif
+      return -1;
+    }
+  }
 #endif
   return sent;
 }

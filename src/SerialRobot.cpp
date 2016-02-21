@@ -1135,7 +1135,7 @@ RobotMotion::setRight( SerialRobot *r )
   Constructor
 */
 
-SerialRobot::SerialRobot(char *devname, int n): name((char*)"SerialRobot"),motionDir((char*)""),motionTime(300),senseTime(300),timeout(500),
+SerialRobot::SerialRobot(char *devname, int brate, int n): name((char*)"SerialRobot"),motionDir((char*)""),motionTime(300),senseTime(300),timeout(500),
 repeatCount(1),reverseFlag(0),executeMotion(false),commandCount(0),commandSize(0)
 {
   joints = n;
@@ -1148,7 +1148,7 @@ repeatCount(1),reverseFlag(0),executeMotion(false),commandCount(0),commandSize(0
   mutex_motion = NULL;
 #endif
 
-  com = new SerialCom(devname);
+  com = new SerialCom(devname, brate);
 
   initPosture = new RobotPosture(n);
   currentPosture = new RobotPosture(n);

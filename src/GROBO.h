@@ -58,7 +58,7 @@ public:
   /*
    *Constructor
    */
-  GR001(char *devname);
+  GR001(char *devname, int brate);
   /*
    * Deconstructor
    */
@@ -86,6 +86,7 @@ public:
    */
   int setTorque(unsigned char id, char val);
   void setServo(char on, int c);
+  int changeBaudRate(int n);
 
   /*
    *  get the angle of the motor.
