@@ -168,6 +168,22 @@ main(int argc, char* argv[])
        std::cout << "[[RIGHT]]" << std::endl;
        G_ROBO->selectMove(4);
        G_ROBO->setMotionCount(1);
+    }else if(strcmp(line, "al") == 0) { /* Attack left */
+       std::cout << "[[ATTACK LEFT]]" << std::endl;
+       G_ROBO->selectMove(10);
+       G_ROBO->setMotionCount(1);
+    }else if(strcmp(line, "ar") == 0) { /* Attack right */
+       std::cout << "[[ATTACK RIGHT]]" << std::endl;
+       G_ROBO->selectMove(11);
+       G_ROBO->setMotionCount(1);
+    }else if(strcmp(line, "gf") == 0) { /* Getup front */
+       std::cout << "[[GETUP FRONT]]" << std::endl;
+       G_ROBO->selectMove(20);
+       G_ROBO->setMotionCount(1);
+    }else if(strcmp(line, "gb") == 0) { /* Getup back */
+       std::cout << "[[GETUP BACK]]" << std::endl;
+       G_ROBO->selectMove(21);
+       G_ROBO->setMotionCount(1);
     }else if(strcmp(line, "q") == 0){        /* コマンド入力ループを抜ける(終了) */
        loop = 0;
     }else{                                      /* 入力された文字列の動作パターンファイルを探して、存在すれば実行する */

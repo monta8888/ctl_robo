@@ -253,6 +253,10 @@ public:
   void setBack( SerialRobot *r );
   void setLeft( SerialRobot *r );
   void setRight( SerialRobot *r );
+  void setAttackLeft( SerialRobot *r );
+  void setAttackRight( SerialRobot *r );
+  void setGetupFront( SerialRobot *r );
+  void setGetupBack( SerialRobot *r );
 
 public:
   std::vector<RobotPosture *> motion;  //  current motion data
