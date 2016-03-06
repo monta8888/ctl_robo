@@ -168,6 +168,14 @@ main(int argc, char* argv[])
        std::cout << "[[RIGHT]]" << std::endl;
        G_ROBO->selectMove(4);
        G_ROBO->setMotionCount(1);
+    }else if(strcmp(line, "d") == 0) { /* LeftTurn */
+       std::cout << "[[LEFT TURN]]" << std::endl;
+       G_ROBO->selectMove(5);
+       G_ROBO->setMotionCount(1);
+    }else if(strcmp(line, "h") == 0) { /* RightTurn */
+       std::cout << "[[RIGHT TURN]]" << std::endl;
+       G_ROBO->selectMove(6);
+       G_ROBO->setMotionCount(1);
     }else if(strcmp(line, "al") == 0) { /* Attack left */
        std::cout << "[[ATTACK LEFT]]" << std::endl;
        G_ROBO->selectMove(10);

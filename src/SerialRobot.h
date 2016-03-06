@@ -253,6 +253,8 @@ public:
   void setBack( SerialRobot *r );
   void setLeft( SerialRobot *r );
   void setRight( SerialRobot *r );
+  void setLeftTurn( SerialRobot *r );
+  void setRightTurn( SerialRobot *r );
   void setAttackLeft( SerialRobot *r );
   void setAttackRight( SerialRobot *r );
   void setGetupFront( SerialRobot *r );
