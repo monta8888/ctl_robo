@@ -29,6 +29,16 @@
 #define FileDelim	"/"
 #endif
 
+#define POS_GETUP_FRONT 14
+#define POS_GETUP_BACK  14
+#define POS_SET_FORWARD 20
+#define POS_SET_BACK    20
+#define POS_SET_LEFT     4
+#define POS_SET_RIGHT    4
+#define POS_SET_TLEFT    6
+#define POS_SET_TRIGHT   6
+#define POS_SET_ALEFT    7
+#define POS_SET_ARIGHT   5
 
 #ifdef __cplusplus__
 extern "C"{
@@ -249,6 +259,7 @@ public:
   /*
    *  moving function
    */
+  void pushBackMotion( SerialRobot *r, int pos[][20], int len, int mt );
   void setForward( SerialRobot *r );
   void setBack( SerialRobot *r );
   void setLeft( SerialRobot *r );
@@ -480,6 +491,20 @@ public:
   void set_7led();
   void set_8led();
   void set_9led();
+  void set_10led();
+  void set_11led();
+  void set_12led();
+  void set_13led();
+  void set_14led();
+  void set_15led();
+  void set_16led();
+  void set_17led();
+  void set_18led();
+  void set_19led();
+  void set_forward_led();
+  void set_back_led();
+  void set_left_led();
+  void set_right_led();
 #endif
 
 public:
