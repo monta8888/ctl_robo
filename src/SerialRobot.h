@@ -260,16 +260,6 @@ public:
    *  moving function
    */
   void pushBackMotion( SerialRobot *r, int pos[][20], int len, int mt );
-  void setForward( SerialRobot *r );
-  void setBack( SerialRobot *r );
-  void setLeft( SerialRobot *r );
-  void setRight( SerialRobot *r );
-  void setLeftTurn( SerialRobot *r );
-  void setRightTurn( SerialRobot *r );
-  void setAttackLeft( SerialRobot *r );
-  void setAttackRight( SerialRobot *r );
-  void setGetupFront( SerialRobot *r );
-  void setGetupBack( SerialRobot *r );
 
 public:
   std::vector<RobotPosture *> motion;  //  current motion data

@@ -1208,76 +1208,6 @@ RobotMotion::pushBackMotion( SerialRobot *r, int pos[][20], int len, int mt )
   return;
 }
 
-void
-RobotMotion::setGetupFront( SerialRobot *r )
-{
-  pushBackMotion(r, pos_getup_front, POS_GETUP_FRONT, 2);
-  return;
-}
-
-void
-RobotMotion::setGetupBack( SerialRobot *r )
-{
-  pushBackMotion(r, pos_getup_back, POS_GETUP_BACK, 2);
-  return;
-}
-
-void
-RobotMotion::setForward( SerialRobot *r )
-{
-  pushBackMotion(r, pos_forward, POS_SET_FORWARD, 1);
-  return;
-}
-
-void
-RobotMotion::setBack( SerialRobot *r )
-{
-  pushBackMotion(r, pos_back, POS_SET_BACK, 1);
-  return;
-}
-
-void
-RobotMotion::setLeft( SerialRobot *r )
-{
-  pushBackMotion(r, pos_left, POS_SET_LEFT, 1);
-  return;
-}
-
-void
-RobotMotion::setRight( SerialRobot *r )
-{
-  pushBackMotion(r, pos_right, POS_SET_RIGHT, 1);
-  return;
-}
-
-void
-RobotMotion::setLeftTurn( SerialRobot *r )
-{
-  pushBackMotion(r, pos_tleft, POS_SET_TLEFT, 1);
-  return;
-}
-
-void
-RobotMotion::setRightTurn( SerialRobot *r )
-{
-  pushBackMotion(r, pos_tright, POS_SET_TRIGHT, 1);
-  return;
-}
-
-void
-RobotMotion::setAttackLeft( SerialRobot *r )
-{
-  pushBackMotion(r, pos_attckleft, POS_SET_ALEFT, 1);
-  return;
-}
-
-void
-RobotMotion::setAttackRight( SerialRobot *r )
-{
-  pushBackMotion(r, pos_attackright, POS_SET_ARIGHT, 2);
-  return;
-}
-
 /********  Class Serial Robot *******************/
 /**
   Constructor
@@ -1828,43 +1758,43 @@ SerialRobot::selectMove( int n )
 
   switch(n) {
   case 1:
-    motion->setForward(this);
+    motion->pushBackMotion(this, pos_forward,     POS_SET_FORWARD, 1);
     set_forward_led();
     break;
   case 2:
-    motion->setBack(this);
+    motion->pushBackMotion(this, pos_back,        POS_SET_BACK,    1);
     set_back_led();
     break;
   case 3:
-    motion->setLeft(this);
+    motion->pushBackMotion(this, pos_left,        POS_SET_LEFT,    1);
     set_left_led();
     break;
   case 4:
-    motion->setRight(this);
+    motion->pushBackMotion(this, pos_right,       POS_SET_RIGHT,   1);
     set_right_led();
     break;
   case 5:
-    motion->setLeftTurn(this);
+    motion->pushBackMotion(this, pos_tleft,       POS_SET_TLEFT,   1);
     set_0led();
     break;
   case 6:
-    motion->setRightTurn(this);
+    motion->pushBackMotion(this, pos_tright,      POS_SET_TRIGHT,  1);
     set_0led();
     break;
   case 10:
-    motion->setAttackLeft(this);
+    motion->pushBackMotion(this, pos_attckleft,   POS_SET_ALEFT,   3);
     set_0led();
     break;
   case 11:
-    motion->setAttackRight(this);
+    motion->pushBackMotion(this, pos_attackright, POS_SET_ARIGHT,  3);
     set_0led();
     break;
   case 20:
-    motion->setGetupFront(this);
+    motion->pushBackMotion(this, pos_getup_front, POS_GETUP_FRONT, 1);
     set_0led();
     break;
   case 21:
-    motion->setGetupBack(this);
+    motion->pushBackMotion(this, pos_getup_back,  POS_GETUP_BACK,  1);
     set_0led();
     break;
   }
