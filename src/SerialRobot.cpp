@@ -1731,8 +1731,9 @@ SerialRobot::initPosition()
 #endif
   targetPosture->copyPosture(initPosture);
   startMotion();
+#ifdef CTL_8GPIO
   set_0led();
-
+#endif
   return 0;
 }
 
@@ -1759,43 +1760,63 @@ SerialRobot::selectMove( int n )
   switch(n) {
   case 1:
     motion->pushBackMotion(this, pos_forward,     POS_SET_FORWARD, 1);
+#ifdef CTL_8GPIO
     set_forward_led();
+#endif
     break;
   case 2:
     motion->pushBackMotion(this, pos_back,        POS_SET_BACK,    1);
+#ifdef CTL_8GPIO
     set_back_led();
+#endif
     break;
   case 3:
     motion->pushBackMotion(this, pos_left,        POS_SET_LEFT,    1);
+#ifdef CTL_8GPIO
     set_left_led();
+#endif
     break;
   case 4:
     motion->pushBackMotion(this, pos_right,       POS_SET_RIGHT,   1);
+#ifdef CTL_8GPIO
     set_right_led();
+#endif
     break;
   case 5:
     motion->pushBackMotion(this, pos_tleft,       POS_SET_TLEFT,   1);
+#ifdef CTL_8GPIO
     set_0led();
+#endif
     break;
   case 6:
     motion->pushBackMotion(this, pos_tright,      POS_SET_TRIGHT,  1);
+#ifdef CTL_8GPIO
     set_0led();
+#endif
     break;
   case 10:
     motion->pushBackMotion(this, pos_attckleft,   POS_SET_ALEFT,   3);
+#ifdef CTL_8GPIO
     set_0led();
+#endif
     break;
   case 11:
     motion->pushBackMotion(this, pos_attackright, POS_SET_ARIGHT,  3);
+#ifdef CTL_8GPIO
     set_0led();
+#endif
     break;
   case 20:
     motion->pushBackMotion(this, pos_getup_front, POS_GETUP_FRONT, 1);
+#ifdef CTL_8GPIO
     set_0led();
+#endif
     break;
   case 21:
     motion->pushBackMotion(this, pos_getup_back,  POS_GETUP_BACK,  1);
+#ifdef CTL_8GPIO
     set_0led();
+#endif
     break;
   }
   return motion->getSize();
