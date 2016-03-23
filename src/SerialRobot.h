@@ -38,7 +38,7 @@
 #define POS_SET_TLEFT    6
 #define POS_SET_TRIGHT   6
 #define POS_SET_ALEFT    7
-#define POS_SET_ARIGHT   5
+#define POS_SET_ARIGHT   7
 
 #ifdef __cplusplus__
 extern "C"{
